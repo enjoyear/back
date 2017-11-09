@@ -10,6 +10,11 @@ import java.util.List;
 public interface Scraper {
   Logger logger = Logger.getLogger(Scraper.class);
 
+  /**
+   * @return a list of urls for each stock
+   */
+  List<StockWebPage> getProfilePages() throws IOException;
+
   void doScraping(List<StockWebPage> pages, ScrapingTask scrapingTask) throws ConnectException;
 
   default void doAllScraping(ScrapingTask scrapingTask) {
@@ -20,6 +25,4 @@ public interface Scraper {
       throw new RuntimeException(e);
     }
   }
-
-  List<StockWebPage> getProfilePages() throws IOException;
 }

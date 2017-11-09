@@ -3,35 +3,30 @@ package com.chen.guo.crawler.model;
 import java.io.Serializable;
 
 public class StockWebPage implements Serializable {
-  private final String name;
-  private final String code;
-  private final String url;
+  private final String _name;
+  private final String _code;
+  private final String _url;
 
   public StockWebPage(String name, String code, String url) {
-
-    this.name = name;
-    this.code = code;
-    this.url = url;
+    _name = name;
+    _code = code;
+    _url = url;
   }
 
   public String getName() {
-    return name;
+    return _name;
   }
 
   public String getCode() {
-    return code;
+    return _code;
   }
 
   public String getUrl() {
-    return url;
+    return _url;
   }
 
   @Override
   public String toString() {
-    return "StockWebPage{" +
-        "name='" + name + '\'' +
-        ", code='" + code + '\'' +
-        ", url='" + url + '\'' +
-        '}';
+    return String.format("StockWebPage{'%s','%s','%s'}", _code, _name, _url);
   }
 }

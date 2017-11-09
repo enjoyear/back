@@ -24,50 +24,17 @@ public class CfiScraper implements Scraper {
   private static final WebAccessUtil WEB_PAGE_UTIL = WebAccessUtil.getInstance();
 
   @Override
-  public void doScraping(List<StockWebPage> pages, ScrapingTask scrapingTask) throws ConnectException {
-    long startTime = System.currentTimeMillis();
-
-    ForkJoinPool pool = new ForkJoinPool(MAX_THREAD_COUNT);
-    WebAccessUtil localWebUtil = WEB_PAGE_UTIL;
-    WebAccessUtil webUtil20 = new WebAccessUtil(20);
-    int retryCount = 3;
-    List<StockWebPage> workToBeDone = pages;
-    while (!workToBeDone.isEmpty() && retryCount > 0) {
-      ConcurrentLinkedQueue<StockWebPage> failedPages = new ConcurrentLinkedQueue<>();
-      pool.invoke(new CfiScrapingAsyncAction(scrapingTask, workToBeDone, failedPages, localWebUtil));
-      logger.info(String.format("%d out of %d pages failed", failedPages.size(), workToBeDone.size()));
-
-      workToBeDone = new ArrayList<>();
-      if (!failedPages.isEmpty()) {
-        --retryCount;
-        localWebUtil = webUtil20; //set longer connection time
-        workToBeDone.clear();
-        failedPages.forEach(workToBeDone::add); //Add failed pages to workToBeDone and try again.
-        logger.warn(String.format("Retries remaining %d times. Failed pages are as follows: ", retryCount));
-        logger.warn(String.join(",", workToBeDone.stream().map(StockWebPage::toString).collect(Collectors.toList())));
-      }
-    }
-
-    logger.info("Whole process took " + (System.currentTimeMillis() - startTime) / 1000 + " seconds to finish");
-    if (!workToBeDone.isEmpty() && retryCount == 0) {
-      throw new ConnectException(String.format(
-          "Failed to connect to %d pages:\n%s", workToBeDone.size(),
-          String.join(",", workToBeDone.stream().map(StockWebPage::toString).collect(Collectors.toList()))));
-    }
-  }
-
-  @Override
   public List<StockWebPage> getProfilePages() throws IOException {
-    String shaZB = "http://quote.cfi.cn/stockList.aspx?t=11";
-    String shenZB = "http://quote.cfi.cn/stockList.aspx?t=12";
-    String shenZXB = "http://quote.cfi.cn/stockList.aspx?t=13";
-    String shenCYB = "http://quote.cfi.cn/stockList.aspx?t=14";
-    List<String> listUrls = Arrays.asList(shaZB, shenZB, shenZXB, shenCYB);
+    String shA = "http://quote.cfi.cn/stockList.aspx?t=11";
+    String szA = "http://quote.cfi.cn/stockList.aspx?t=12";
+    String szZX = "http://quote.cfi.cn/stockList.aspx?t=13";
+    String szCY = "http://quote.cfi.cn/stockList.aspx?t=14";
+    List<String> catalogUrls = Arrays.asList(shA, szA, szZX, szCY);
 
-    List<StockWebPage> all = new ArrayList<>(10000);
+    List<StockWebPage> all = new ArrayList<>(20000);
 
     //TODO: Change to async calls.
-    listUrls.forEach(x -> {
+    catalogUrls.forEach(x -> {
       try {
         all.addAll(getProfilePages(x));
       } catch (IOException e) {
@@ -103,5 +70,38 @@ public class CfiScraper implements Scraper {
       }
     }
     return interestedPages;
+  }
+
+  @Override
+  public void doScraping(List<StockWebPage> pages, ScrapingTask scrapingTask) throws ConnectException {
+    long startTime = System.currentTimeMillis();
+
+    ForkJoinPool pool = new ForkJoinPool(MAX_THREAD_COUNT);
+    WebAccessUtil localWebUtil = WEB_PAGE_UTIL;
+    WebAccessUtil webUtil20 = new WebAccessUtil(20);
+    int retryCount = 3;
+    List<StockWebPage> workToBeDone = pages;
+    while (!workToBeDone.isEmpty() && retryCount > 0) {
+      ConcurrentLinkedQueue<StockWebPage> failedPages = new ConcurrentLinkedQueue<>();
+      pool.invoke(new CfiScrapingAsyncAction(scrapingTask, workToBeDone, failedPages, localWebUtil));
+      logger.info(String.format("%d out of %d pages failed", failedPages.size(), workToBeDone.size()));
+
+      workToBeDone = new ArrayList<>();
+      if (!failedPages.isEmpty()) {
+        --retryCount;
+        localWebUtil = webUtil20; //set longer connection time
+        workToBeDone.clear();
+        failedPages.forEach(workToBeDone::add); //Add failed pages to workToBeDone and try again.
+        logger.warn(String.format("Retries remaining %d times. Failed pages are as follows: ", retryCount));
+        logger.warn(String.join(",", workToBeDone.stream().map(StockWebPage::toString).collect(Collectors.toList())));
+      }
+    }
+
+    logger.info("Whole process took " + (System.currentTimeMillis() - startTime) / 1000 + " seconds to finish");
+    if (!workToBeDone.isEmpty() && retryCount == 0) {
+      throw new ConnectException(String.format(
+          "Failed to connect to %d pages:\n%s", workToBeDone.size(),
+          String.join(",", workToBeDone.stream().map(StockWebPage::toString).collect(Collectors.toList()))));
+    }
   }
 }
