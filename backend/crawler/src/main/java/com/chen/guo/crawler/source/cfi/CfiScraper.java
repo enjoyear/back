@@ -56,7 +56,10 @@ public class CfiScraper implements Scraper {
         String nameCode = col.text();
         int index = nameCode.indexOf("(");
         String code = nameCode.substring(index + 1, nameCode.length() - 1).trim();
-        StockWebPage sp = new StockWebPage(nameCode.substring(0, index).trim(), code, WebAccessUtil.getHyperlink(col));
+        StockWebPage sp = new StockWebPage(
+            nameCode.substring(0, index).trim(), code, WebAccessUtil.getHyperlink(col));
+        _logger.info(sp.toString());
+
         if (code.startsWith("0") || code.startsWith("6") || code.startsWith("3")) {
           if (code.length() != 6) {
             _logger.warn(String.format("Unexpected code '%s' at list page %s", sp, listUrl));

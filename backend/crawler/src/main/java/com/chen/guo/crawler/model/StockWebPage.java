@@ -27,6 +27,6 @@ public class StockWebPage implements Serializable {
 
   @Override
   public String toString() {
-    return String.format("StockWebPage{'%s','%s','%s'}", _code, _name, _url);
+    return String.format("SWP{'%s','%s','%s'}", _code, _name, _url);
   }
 }
