@@ -16,10 +16,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class CfiScraper implements Scraper {
-  private static final Logger _logger = Logger.getLogger(CfiScraper.class);
+  private static final Logger LOGGER = Logger.getLogger(CfiScraper.class);
+  private static final Pattern ALL_DIGITS = Pattern.compile("\\d{6}");
   private static final Integer MAX_THREAD_COUNT = 8; //Should be configured to use the max count of cores of the machine
   private static final WebAccessUtil WEB_PAGE_UTIL = WebAccessUtil.getInstance();
 
@@ -41,7 +43,7 @@ public class CfiScraper implements Scraper {
           try {
             pages = getProfilePages(seedUrl);
           } catch (IOException e) {
-            _logger.error(String.format("Unable to get all pages from the seed '%s' due to %s. Retrying...", seedUrl, e.getMessage()));
+            LOGGER.error(String.format("Unable to get all pages from the seed '%s' due to %s. Retrying...", seedUrl, e.getMessage()));
           }
         }
         syncAll.addAll(pages);
@@ -53,7 +55,7 @@ public class CfiScraper implements Scraper {
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
-    _logger.info("Total numbers of StockWebPage created: " + syncAll.size());
+    LOGGER.info("Total numbers of StockWebPage created: " + syncAll.size()); //3443
     return new ArrayList<>(syncAll);
   }
 
@@ -71,16 +73,12 @@ public class CfiScraper implements Scraper {
         String code = nameCode.substring(index + 1, nameCode.length() - 1).trim();
         StockWebPage sp = new StockWebPage(
             nameCode.substring(0, index).trim(), code, WebAccessUtil.getHyperlink(col));
-        _logger.info(sp.toString());
 
-        if (code.startsWith("0") || code.startsWith("6") || code.startsWith("3")) {
-          if (code.length() != 6) {
-            _logger.warn(String.format("Unexpected code '%s' at list page %s", sp, listUrl));
-            continue;
-          }
+        if (checkForSWPCriteria(sp)) {
+          LOGGER.info(sp.toString());
           interestedPages.add(sp);
         } else {
-          _logger.debug("Non-included stock: " + sp);
+          LOGGER.debug("Non-included stock: " + sp);
         }
       }
     }
@@ -99,7 +97,7 @@ public class CfiScraper implements Scraper {
     while (!workToBeDone.isEmpty() && retryCount > 0) {
       ConcurrentLinkedQueue<StockWebPage> failedPages = new ConcurrentLinkedQueue<>();
       pool.invoke(new CfiScrapingAsyncAction(scrapingTask, workToBeDone, failedPages, localWebUtil));
-      _logger.info(String.format("%d out of %d pages failed", failedPages.size(), workToBeDone.size()));
+      LOGGER.info(String.format("%d out of %d pages failed", failedPages.size(), workToBeDone.size()));
 
       workToBeDone = new ArrayList<>();
       if (!failedPages.isEmpty()) {
@@ -107,17 +105,32 @@ public class CfiScraper implements Scraper {
         localWebUtil = webUtil20; //set longer connection time
         workToBeDone.clear();
         failedPages.forEach(workToBeDone::add); //Add failed pages to workToBeDone and try again.
-        _logger.warn(String.format("Retries remaining %d times. Failed pages are as follows: ", retryCount));
-        _logger.warn(String.join(",", workToBeDone.stream().map(StockWebPage::toString).collect(Collectors.toList())));
+        LOGGER.warn(String.format("Retries remaining %d times. Failed pages are as follows: ", retryCount));
+        LOGGER.warn(String.join(",", workToBeDone.stream().map(StockWebPage::toString).collect(Collectors.toList())));
       }
     }
 
-    _logger.info("Whole process took " + (System.currentTimeMillis() - startTime) / 1000 + " seconds to finish");
+    LOGGER.info("Whole process took " + (System.currentTimeMillis() - startTime) / 1000 + " seconds to finish");
     if (!workToBeDone.isEmpty() && retryCount == 0) {
       throw new ConnectException(String.format(
           "Failed to connect to %d pages:\n%s", workToBeDone.size(),
           String.join(",", workToBeDone.stream().map(StockWebPage::toString).collect(Collectors.toList()))));
     }
+  }
+
+  static boolean checkForSWPCriteria(StockWebPage sp) {
+    String code = sp.getCode();
+    if (code.startsWith("0") ||
+        code.startsWith("6") ||
+        (code.startsWith("3") && !code.startsWith("39"))) {
+      if (checkForCodeCriteria(code))
+        return true;
+    }
+    return false;
+  }
+
+  public static boolean checkForCodeCriteria(String str) {
+    return ALL_DIGITS.matcher(str).matches();
   }
 
   public static void main(String[] args) throws Exception {

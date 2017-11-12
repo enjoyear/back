@@ -8,7 +8,7 @@ import java.net.ConnectException;
 import java.util.List;
 
 public interface Scraper {
-  Logger _logger = Logger.getLogger(Scraper.class);
+  Logger logger = Logger.getLogger(Scraper.class);
 
   /**
    * @return a list of urls for each stock
@@ -21,7 +21,7 @@ public interface Scraper {
     try {
       doScraping(getProfilePages(), scrapingTask);
     } catch (IOException e) {
-      _logger.error(e.getMessage());
+      logger.error(e.getMessage());
       throw new RuntimeException(e);
     }
   }
