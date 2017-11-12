@@ -19,7 +19,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 public class CfiScraper implements Scraper {
-  private static final Logger logger = Logger.getLogger(CfiScraper.class);
+  private static final Logger _logger = Logger.getLogger(CfiScraper.class);
   private static final Integer MAX_THREAD_COUNT = 8; //Should be configured to use the max count of cores of the machine
   private static final WebAccessUtil WEB_PAGE_UTIL = WebAccessUtil.getInstance();
 
@@ -59,13 +59,12 @@ public class CfiScraper implements Scraper {
         StockWebPage sp = new StockWebPage(nameCode.substring(0, index).trim(), code, WebAccessUtil.getHyperlink(col));
         if (code.startsWith("0") || code.startsWith("6") || code.startsWith("3")) {
           if (code.length() != 6) {
-            logger.warn(String.format("Unexpected code '%s' at list page %s", sp, listUrl));
+            _logger.warn(String.format("Unexpected code '%s' at list page %s", sp, listUrl));
             continue;
-          } else {
-            interestedPages.add(sp);
           }
+          interestedPages.add(sp);
         } else {
-          logger.debug("Non-included stock: " + sp);
+          _logger.debug("Non-included stock: " + sp);
         }
       }
     }
@@ -84,7 +83,7 @@ public class CfiScraper implements Scraper {
     while (!workToBeDone.isEmpty() && retryCount > 0) {
       ConcurrentLinkedQueue<StockWebPage> failedPages = new ConcurrentLinkedQueue<>();
       pool.invoke(new CfiScrapingAsyncAction(scrapingTask, workToBeDone, failedPages, localWebUtil));
-      logger.info(String.format("%d out of %d pages failed", failedPages.size(), workToBeDone.size()));
+      _logger.info(String.format("%d out of %d pages failed", failedPages.size(), workToBeDone.size()));
 
       workToBeDone = new ArrayList<>();
       if (!failedPages.isEmpty()) {
@@ -92,16 +91,20 @@ public class CfiScraper implements Scraper {
         localWebUtil = webUtil20; //set longer connection time
         workToBeDone.clear();
         failedPages.forEach(workToBeDone::add); //Add failed pages to workToBeDone and try again.
-        logger.warn(String.format("Retries remaining %d times. Failed pages are as follows: ", retryCount));
-        logger.warn(String.join(",", workToBeDone.stream().map(StockWebPage::toString).collect(Collectors.toList())));
+        _logger.warn(String.format("Retries remaining %d times. Failed pages are as follows: ", retryCount));
+        _logger.warn(String.join(",", workToBeDone.stream().map(StockWebPage::toString).collect(Collectors.toList())));
       }
     }
 
-    logger.info("Whole process took " + (System.currentTimeMillis() - startTime) / 1000 + " seconds to finish");
+    _logger.info("Whole process took " + (System.currentTimeMillis() - startTime) / 1000 + " seconds to finish");
     if (!workToBeDone.isEmpty() && retryCount == 0) {
       throw new ConnectException(String.format(
           "Failed to connect to %d pages:\n%s", workToBeDone.size(),
           String.join(",", workToBeDone.stream().map(StockWebPage::toString).collect(Collectors.toList()))));
     }
+  }
+
+  public static void main(String[] args) throws Exception {
+    new CfiScraper().getProfilePages();
   }
 }

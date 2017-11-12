@@ -8,8 +8,10 @@ import org.jsoup.nodes.Element;
 import java.io.IOException;
 
 public class WebAccessUtil {
-  private final int connectionTimeout;
-  private static WebAccessUtil INSTANCE_DEFAULT = null;
+  public static final int DEFAULT_CONNECTION_TIMEOUT = 5;
+  private static WebAccessUtil INSTANCE_DEFAULT;
+
+  private final int _connectionTimeout;
 
   static {
     INSTANCE_DEFAULT = new WebAccessUtil();
@@ -23,16 +25,16 @@ public class WebAccessUtil {
   }
 
   private WebAccessUtil() {
-    this(5);  //default timeout for internet connection is 5 second
+    this(DEFAULT_CONNECTION_TIMEOUT);
   }
 
   public WebAccessUtil(Integer internetTimeoutSecond) {
-    this.connectionTimeout = internetTimeoutSecond * 1000;
+    _connectionTimeout = internetTimeoutSecond * 1000;
   }
 
   public Document getPageContent(String url) throws IOException {
     Connection connect = Jsoup.connect(url);
-    connect.timeout(connectionTimeout);
+    connect.timeout(_connectionTimeout);
     return connect.get();
   }
 
