@@ -3,6 +3,7 @@ package com.chen.guo.crawler.source.cfi;
 import com.chen.guo.crawler.model.StockWebPage;
 import com.chen.guo.crawler.source.Scraper;
 import com.chen.guo.crawler.source.ScrapingTask;
+import com.chen.guo.crawler.source.cfi.task.CfiScrapingNetIncomeTaskHist;
 import com.chen.guo.crawler.util.WebAccessUtil;
 import org.apache.log4j.Logger;
 import org.jsoup.nodes.Document;
@@ -11,10 +12,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.net.ConnectException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -87,35 +85,40 @@ public class CfiScraper implements Scraper {
 
   @Override
   public void doScraping(List<StockWebPage> pages, ScrapingTask scrapingTask) throws ConnectException {
+    int retryCount = 3;
+    List<StockWebPage> jobs = pages;
     long startTime = System.currentTimeMillis();
 
     ForkJoinPool pool = new ForkJoinPool(MAX_THREAD_COUNT);
     WebAccessUtil localWebUtil = WEB_PAGE_UTIL;
     WebAccessUtil webUtil20 = new WebAccessUtil(20);
-    int retryCount = 3;
-    List<StockWebPage> workToBeDone = pages;
-    while (!workToBeDone.isEmpty() && retryCount > 0) {
-      ConcurrentLinkedQueue<StockWebPage> failedPages = new ConcurrentLinkedQueue<>();
-      pool.invoke(new CfiScrapingAsyncAction(scrapingTask, workToBeDone, failedPages, localWebUtil));
-      LOGGER.info(String.format("%d out of %d pages failed", failedPages.size(), workToBeDone.size()));
 
-      workToBeDone = new ArrayList<>();
-      if (!failedPages.isEmpty()) {
+    while (!jobs.isEmpty() && retryCount > 0) {
+      ConcurrentLinkedQueue<StockWebPage> failed = new ConcurrentLinkedQueue<>();
+      pool.invoke(new CfiScrapingAsyncAction(scrapingTask, jobs, failed, localWebUtil));
+      LOGGER.info(
+          String.format("%d out of %d pages failed. Retrying(%d) with longer connection timeout...",
+              failed.size(), jobs.size(), retryCount));
+
+      jobs = new ArrayList<>();
+      if (!failed.isEmpty()) {
         --retryCount;
         localWebUtil = webUtil20; //set longer connection time
-        workToBeDone.clear();
-        failedPages.forEach(workToBeDone::add); //Add failed pages to workToBeDone and try again.
-        LOGGER.warn(String.format("Retries remaining %d times. Failed pages are as follows: ", retryCount));
-        LOGGER.warn(String.join(",", workToBeDone.stream().map(StockWebPage::toString).collect(Collectors.toList())));
+        LOGGER.warn(printFailedPagesList(failed));
+        jobs.addAll(failed);
       }
     }
 
     LOGGER.info("Whole process took " + (System.currentTimeMillis() - startTime) / 1000 + " seconds to finish");
-    if (!workToBeDone.isEmpty() && retryCount == 0) {
-      throw new ConnectException(String.format(
-          "Failed to connect to %d pages:\n%s", workToBeDone.size(),
-          String.join(",", workToBeDone.stream().map(StockWebPage::toString).collect(Collectors.toList()))));
+
+    if (!jobs.isEmpty() && retryCount == 0) {
+      throw new ConnectException(printFailedPagesList(jobs));
     }
+  }
+
+  private String printFailedPagesList(Collection<StockWebPage> failed) {
+    return String.format("Failed to download %d pages:\n%s", failed.size(),
+        String.join(",", failed.stream().map(StockWebPage::toString).collect(Collectors.toList())));
   }
 
   /**
