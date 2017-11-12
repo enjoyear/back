@@ -13,9 +13,9 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class CfiScraper implements Scraper {
@@ -24,24 +24,37 @@ public class CfiScraper implements Scraper {
   private static final WebAccessUtil WEB_PAGE_UTIL = WebAccessUtil.getInstance();
 
   @Override
-  public List<StockWebPage> getProfilePages() throws IOException {
+  public List<StockWebPage> getProfilePages() {
     String shA = "http://quote.cfi.cn/stockList.aspx?t=11";
     String szA = "http://quote.cfi.cn/stockList.aspx?t=12";
     String szZX = "http://quote.cfi.cn/stockList.aspx?t=13";
     String szCY = "http://quote.cfi.cn/stockList.aspx?t=14";
     List<String> catalogUrls = Arrays.asList(shA, szA, szZX, szCY);
 
-    List<StockWebPage> all = new ArrayList<>(20000);
+    ExecutorService es = Executors.newCachedThreadPool();
+    List<StockWebPage> syncAll = Collections.synchronizedList(new ArrayList<>(16000));
 
-    //TODO: Change to async calls.
-    catalogUrls.forEach(x -> {
-      try {
-        all.addAll(getProfilePages(x));
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+    catalogUrls.forEach(seedUrl -> {
+      es.submit(() -> {
+        List<StockWebPage> pages = null;
+        while (pages == null) {
+          try {
+            pages = getProfilePages(seedUrl);
+          } catch (IOException e) {
+            _logger.error(String.format("Unable to get all pages from the seed '%s' due to %s. Retrying...", seedUrl, e.getMessage()));
+          }
+        }
+        syncAll.addAll(pages);
+      });
     });
-    return all;
+    es.shutdown();
+    try {
+      es.awaitTermination(20, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+    _logger.info("Total numbers of StockWebPage created: " + syncAll.size());
+    return new ArrayList<>(syncAll);
   }
 
   private List<StockWebPage> getProfilePages(String listUrl) throws IOException {
@@ -50,7 +63,7 @@ public class CfiScraper implements Scraper {
     Element table = content.getElementsByTag("table").first().getElementsByTag("tbody").first();
     Elements rows = table.getElementsByTag("tr");
 
-    List<StockWebPage> interestedPages = new ArrayList<>(2000);
+    List<StockWebPage> interestedPages = new ArrayList<>(4000);
     for (Element row : rows) {
       for (Element col : row.children()) {
         String nameCode = col.text();
