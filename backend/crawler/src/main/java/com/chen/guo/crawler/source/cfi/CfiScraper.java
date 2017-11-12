@@ -55,7 +55,7 @@ public class CfiScraper implements Scraper {
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
-    LOGGER.info("Total numbers of StockWebPage created: " + syncAll.size()); //3443
+    LOGGER.info("Total numbers of StockWebPage created: " + syncAll.size()); //3356
     return new ArrayList<>(syncAll);
   }
 
@@ -75,7 +75,7 @@ public class CfiScraper implements Scraper {
             nameCode.substring(0, index).trim(), code, WebAccessUtil.getHyperlink(col));
 
         if (checkForSWPCriteria(sp)) {
-          LOGGER.info(sp.toString());
+          //LOGGER.info(sp.toString());
           interestedPages.add(sp);
         } else {
           LOGGER.debug("Non-included stock: " + sp);
@@ -118,17 +118,37 @@ public class CfiScraper implements Scraper {
     }
   }
 
+  /**
+   * Exclude all ST, *ST, s*st
+   */
   static boolean checkForSWPCriteria(StockWebPage sp) {
     String code = sp.getCode();
     if (code.startsWith("0") ||
         code.startsWith("6") ||
         (code.startsWith("3") && !code.startsWith("39"))) {
-      if (checkForCodeCriteria(code))
+      if (checkForCodeCriteria(code)) {
+        //Exclude when the name is too long
+        if (sp.getName().length() > 4 &&
+            !sp.getName().equals("TCL集团")) {
+          if (!sp.getName().toLowerCase().startsWith("*st"))
+            LOGGER.info("Exclude: " + sp);
+          return false;
+        }
+
+        //Exclude ST
+        if (sp.getName().toLowerCase().startsWith("st")) {
+          return false;
+        }
+
         return true;
+      }
     }
     return false;
   }
 
+  /**
+   * Make sure a 6-digit code
+   */
   public static boolean checkForCodeCriteria(String str) {
     return ALL_DIGITS.matcher(str).matches();
   }
