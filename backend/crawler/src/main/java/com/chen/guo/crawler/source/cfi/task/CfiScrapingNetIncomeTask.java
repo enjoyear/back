@@ -10,15 +10,15 @@ import java.io.IOException;
 
 public abstract class CfiScrapingNetIncomeTask extends ScrapingTask<Integer, Double> {
 
-  protected final CfiScrapingMenuTask _menuTask;
+  protected final CfiMenuClickTask _menuTask;
 
   protected CfiScrapingNetIncomeTask() {
-    _menuTask = new CfiScrapingMenuTask("nodea1", "财务分析指标");
+    _menuTask = new CfiMenuClickTask("nodea1", "财务分析指标");
   }
 
   @Override
   public void scrape(StockWebPage page) throws IOException {
-    scrape(page.getCode(), _menuTask.getMenuPage(page));
+    scrape(page.getCode(), _menuTask.getPage(page));
   }
 
   protected abstract void scrape(String ticker, String url财务分析指标) throws IOException;

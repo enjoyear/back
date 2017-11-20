@@ -20,20 +20,20 @@ public class CfiScrapingCapitalizationTaskHist extends ScrapingTask<String, Pair
   private static final Logger logger = Logger.getLogger(CfiScrapingCapitalizationTaskHist.class);
   private static final String ROOT_URL = "http://quote.cfi.cn";
   private final int _startYear;
-  private final CfiScrapingMenuTask _menuTask;
+  private final CfiMenuClickTask _menuTask;
 
   /**
    * @param startYear denotes the oldest year we care about. This startYear is inclusive
    */
   public CfiScrapingCapitalizationTaskHist(int startYear) {
     _startYear = startYear;
-    _menuTask = new CfiScrapingMenuTask("nodea21", "股本结构");
+    _menuTask = new CfiMenuClickTask("nodea21", "股本结构");
   }
 
   @Override
   public void scrape(StockWebPage stockWebPage) throws IOException {
     WebAccessUtil client = WebAccessUtil.getInstance();
-    String url = _menuTask.getMenuPage(stockWebPage);
+    String url = _menuTask.getPage(stockWebPage);
     Document doc = client.getPageContent(url);
     Element content = doc.getElementById("content");
     TreeMap<String, Pair<String, String>> capitalMap = new TreeMap<>(Comparator.reverseOrder());
