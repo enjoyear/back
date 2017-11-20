@@ -9,7 +9,7 @@ import org.jsoup.nodes.Element;
 import java.io.IOException;
 import java.util.TreeMap;
 
-public class CfiScrapingQuoteTask extends ScrapingTask<String, String> {
+public class CfiQuoteTask extends ScrapingTask<String, String> {
   public static final String LAST_QUOTE = "quote";
   public static final String CHG_VALUE = "chg_val";
   public static final String CHG_PERCENTAGE = "chg_pctg";

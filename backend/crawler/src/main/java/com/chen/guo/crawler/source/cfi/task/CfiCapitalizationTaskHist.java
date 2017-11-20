@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-public class CfiScrapingCapitalizationTaskHist extends ScrapingTask<String, Pair<String, String>> {
-  private static final Logger logger = Logger.getLogger(CfiScrapingCapitalizationTaskHist.class);
+public class CfiCapitalizationTaskHist extends ScrapingTask<String, Pair<String, String>> {
+  private static final Logger logger = Logger.getLogger(CfiCapitalizationTaskHist.class);
   private static final String ROOT_URL = "http://quote.cfi.cn";
   private final int _startYear;
   private final CfiMenuClickTask _menuTask;
@@ -25,7 +25,7 @@ public class CfiScrapingCapitalizationTaskHist extends ScrapingTask<String, Pair
   /**
    * @param startYear denotes the oldest year we care about. This startYear is inclusive
    */
-  public CfiScrapingCapitalizationTaskHist(int startYear) {
+  public CfiCapitalizationTaskHist(int startYear) {
     _startYear = startYear;
     _menuTask = new CfiMenuClickTask("nodea21", "股本结构");
   }

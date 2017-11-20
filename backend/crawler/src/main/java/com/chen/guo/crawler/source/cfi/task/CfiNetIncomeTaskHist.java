@@ -11,14 +11,14 @@ import java.rmi.UnexpectedException;
 import java.time.LocalDate;
 import java.util.TreeMap;
 
-public class CfiScrapingNetIncomeTaskHist extends CfiScrapingNetIncomeTask {
-  private static final Logger logger = Logger.getLogger(CfiScrapingNetIncomeTaskHist.class);
+public class CfiNetIncomeTaskHist extends CfiNetIncomeBaseTask {
+  private static final Logger logger = Logger.getLogger(CfiNetIncomeTaskHist.class);
   private final int _startYear;
 
   /**
    * @param startYear denotes the oldest year we care about. This startYear is inclusive
    */
-  public CfiScrapingNetIncomeTaskHist(int startYear) {
+  public CfiNetIncomeTaskHist(int startYear) {
     _startYear = startYear;
   }
 

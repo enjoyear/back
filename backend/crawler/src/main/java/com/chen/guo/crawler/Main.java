@@ -3,9 +3,9 @@ package com.chen.guo.crawler;
 import com.chen.guo.crawler.model.StockWebPage;
 import com.chen.guo.crawler.source.Scraper;
 import com.chen.guo.crawler.source.ScrapingTask;
-import com.chen.guo.crawler.source.cfi.task.CfiScrapingCapitalizationTaskHist;
-import com.chen.guo.crawler.source.cfi.task.CfiScrapingNetIncomeTaskHist;
-import com.chen.guo.crawler.source.cfi.task.CfiScrapingNetIncomeTaskLatest;
+import com.chen.guo.crawler.source.cfi.task.CfiNetIncomeTaskLatest;
+import com.chen.guo.crawler.source.cfi.task.CfiCapitalizationTaskHist;
+import com.chen.guo.crawler.source.cfi.task.CfiNetIncomeTaskHist;
 import com.chen.guo.crawler.util.CrawlerConfigUtil;
 import com.typesafe.config.ConfigList;
 import com.typesafe.config.ConfigObject;
@@ -24,14 +24,14 @@ public class Main {
 
     //TODO: Refactor this block: move constructor arguments to config objects.
     ScrapingTask task = null;
-    if (taskClass.equals("com.chen.guo.crawler.source.cfi.task.CfiScrapingNetIncomeTaskHist")) {
-      task = new CfiScrapingNetIncomeTaskHist(CrawlerConfigUtil.getStartingYear());
+    if (taskClass.equals("com.chen.guo.crawler.source.cfi.task.CfiNetIncomeTaskHist")) {
+      task = new CfiNetIncomeTaskHist(CrawlerConfigUtil.getStartingYear());
     } else if (taskClass.equals("")) {
-      task = new CfiScrapingNetIncomeTaskLatest();
+      task = new CfiNetIncomeTaskLatest();
     }
     // ======== Refactoring END ========
 
-    CfiScrapingCapitalizationTaskHist scrapingTask = new CfiScrapingCapitalizationTaskHist(2013);
+    CfiCapitalizationTaskHist scrapingTask = new CfiCapitalizationTaskHist(2013);
     scraper.doScraping(Arrays.asList(new StockWebPage("捷成股份", "300182", "http://quote.cfi.cn/300182.html")), scrapingTask);
 
     System.out.println(scrapingTask.getTaskResults());

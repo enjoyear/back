@@ -5,8 +5,8 @@ import org.jsoup.nodes.Element;
 
 import java.io.IOException;
 
-public class CfiScrapingNetIncomeTaskLatest extends CfiScrapingNetIncomeTask {
-  private static final Logger logger = Logger.getLogger(CfiScrapingNetIncomeTaskLatest.class);
+public class CfiNetIncomeTaskLatest extends CfiNetIncomeBaseTask {
+  private static final Logger logger = Logger.getLogger(CfiNetIncomeTaskLatest.class);
 
   @Override
   public void scrape(String ticker, String url财务分析指标) throws IOException {

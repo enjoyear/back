@@ -8,23 +8,29 @@ import org.jsoup.nodes.Element;
 
 import java.io.IOException;
 
-public abstract class CfiScrapingNetIncomeTask extends ScrapingTask<Integer, Double> {
+public abstract class CfiNetIncomeBaseTask extends ScrapingTask<Integer, Double> {
 
   protected final CfiMenuClickTask _menuTask;
 
-  protected CfiScrapingNetIncomeTask() {
+  protected CfiNetIncomeBaseTask() {
     _menuTask = new CfiMenuClickTask("nodea1", "财务分析指标");
   }
 
   @Override
   public void scrape(StockWebPage page) throws IOException {
-    scrape(page.getCode(), _menuTask.getPage(page));
+    String pageToScrape = _menuTask.getPage(page);
+    scrape(page.getCode(), pageToScrape);
   }
 
   protected abstract void scrape(String ticker, String url财务分析指标) throws IOException;
 
-  protected Element getMainTable(String baseUrl) throws IOException {
-    Document doc = WebAccessUtil.getInstance().getPageContent(baseUrl);
+  /**
+   * Get the page element for the table body of the main content
+   *
+   * @param page the page where the table body will be fetched
+   */
+  protected Element getMainTable(String page) throws IOException {
+    Document doc = WebAccessUtil.getInstance().getPageContent(page);
     Element content = doc.getElementById("content");
     return content.getElementsByTag("table").first().getElementsByTag("tbody").first();
   }
