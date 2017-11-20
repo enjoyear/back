@@ -58,7 +58,7 @@ public class CfiScraper implements Scraper {
   }
 
   private List<StockWebPage> getProfilePages(String listUrl) throws IOException {
-    Document listPage = WEB_PAGE_UTIL.getPageContent(listUrl);
+    Document listPage = WEB_PAGE_UTIL.connect(listUrl);
     Element content = listPage.getElementById("divcontent");
     Element table = content.getElementsByTag("table").first().getElementsByTag("tbody").first();
     Elements rows = table.getElementsByTag("tr");

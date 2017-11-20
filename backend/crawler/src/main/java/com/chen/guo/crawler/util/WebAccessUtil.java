@@ -32,7 +32,7 @@ public class WebAccessUtil {
     _connectionTimeout = internetTimeoutSecond * 1000;
   }
 
-  public Document getPageContent(String url) throws IOException {
+  public Document connect(String url) throws IOException {
     Connection connect = Jsoup.connect(url);
     connect.timeout(_connectionTimeout);
     return connect.get();

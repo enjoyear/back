@@ -17,7 +17,7 @@ public class CfiNetIncomeTaskLatest extends CfiNetIncomeBaseTask {
     if (yearMonthTr.getElementsContainingOwnText("截止日期").size() != 1)
       throw new RuntimeException("Didn't get correct line for 截止日期");
     yearMonthTr.children().forEach(c -> System.out.println(c.text()));
-    Element netProfitTr = table.getElementsContainingOwnText("归属母公司净利润").first();
+    Element netProfitTr = table.getElementsContainingOwnText(ROW_ID).first();
     //Get from main page.
     //TODO: add scraped results to "results" variable
     netProfitTr.parent().parent().children().forEach(c -> System.out.println(c.text()));

@@ -22,28 +22,40 @@ public class CfiNetIncomeTaskHist extends CfiNetIncomeBaseTask {
     _startYear = startYear;
   }
 
+  /**
+   * Get all historical data
+   */
+  public CfiNetIncomeTaskHist() {
+    _startYear = -1;
+  }
+
+
   @Override
   public void scrape(String ticker, String url) throws IOException {
-    TreeMap<Integer, Double> data = new TreeMap<>();
-
-    Element netProfitTr = getMainTable(url).getElementsContainingOwnText("归属母公司净利润").first();
+    Element mainTableBody = getMainTable(url);
+    Element netProfitTr = mainTableBody.getElementsContainingOwnText(ROW_ID).first();
     String npPage = netProfitTr.absUrl("href");
-    Document netProfitPage = WebAccessUtil.getInstance().getPageContent(npPage);
+    Document netProfitPage = WebAccessUtil.getInstance().connect(npPage);
     //Get all historical
     Elements rows = netProfitPage.getElementById("content").getElementsByTag("tbody").first().children();
 
     Element header = rows.get(1);
-    if (!header.child(0).text().equals("报告期") || !header.child(1).text().equals("归属母公司净利润（元）"))
+    //Do validation with the header
+    if (!header.child(0).text().equals("报告期") || !header.child(1).text().equals(ROW_FULL_NAME)) {
       throw new UnexpectedException("Layout of the table seem to be changed for: " + npPage);
-    //Skip first two header rows.
-    for (int r = 2; r < rows.size(); ++r) {
+    }
+
+    TreeMap<Integer, Double> data = new TreeMap<>();
+    //Skip first two lines of headers, and last empty line.
+    for (int r = 2; r < rows.size() - 1; ++r) {
       Element row = rows.get(r);
       Elements children = row.children();
       LocalDate date = getDate(children.get(0).text());
       if (date.getYear() >= _startYear) {
         data.put(date.getYear() * 100 + date.getMonthValue(), Double.valueOf(children.get(1).text()));
-      } else
+      } else {
         break;
+      }
     }
     results.put(ticker, data);
   }

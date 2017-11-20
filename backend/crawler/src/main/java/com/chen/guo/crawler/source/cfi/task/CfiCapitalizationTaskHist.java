@@ -34,7 +34,7 @@ public class CfiCapitalizationTaskHist extends ScrapingTask<String, Pair<String,
   public void scrape(StockWebPage stockWebPage) throws IOException {
     WebAccessUtil client = WebAccessUtil.getInstance();
     String url = _menuTask.getPage(stockWebPage);
-    Document doc = client.getPageContent(url);
+    Document doc = client.connect(url);
     Element content = doc.getElementById("content");
     TreeMap<String, Pair<String, String>> capitalMap = new TreeMap<>(Comparator.reverseOrder());
     updateCapMap(content, capitalMap);
@@ -55,7 +55,7 @@ public class CfiCapitalizationTaskHist extends ScrapingTask<String, Pair<String,
         break;
       }
       String newUrl = ROOT_URL + redirectUrl + year;
-      Document newDoc = client.getPageContent(newUrl);
+      Document newDoc = client.connect(newUrl);
       Element newContent = newDoc.getElementById("content");
       updateCapMap(newContent, capitalMap);
     }

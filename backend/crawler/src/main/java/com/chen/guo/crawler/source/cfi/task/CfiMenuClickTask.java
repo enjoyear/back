@@ -28,7 +28,7 @@ class CfiMenuClickTask {
    */
   public String getPage(StockWebPage page) throws IOException {
     String rootUrl = page.getUrl();
-    Element nodeElement = WebAccessUtil.getInstance().getPageContent(rootUrl).getElementById(_nodeId);
+    Element nodeElement = WebAccessUtil.getInstance().connect(rootUrl).getElementById(_nodeId);
     Element clickLine = nodeElement.getElementsByTag("nobr").first();
     if (!_name.equals(clickLine.text())) {
       throw new UnexpectedException(String.format(
