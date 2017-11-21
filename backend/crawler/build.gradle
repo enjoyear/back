@@ -2,3 +2,8 @@ dependencies {
     compile project(':util')
     compile group: 'org.jsoup', name: 'jsoup', version: '1.11.1'
 }
+
+task run(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.chen.guo.crawler.Main'
+}
