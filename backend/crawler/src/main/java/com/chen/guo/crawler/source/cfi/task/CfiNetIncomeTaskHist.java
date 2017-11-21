@@ -1,6 +1,7 @@
 package com.chen.guo.crawler.source.cfi.task;
 
-import com.chen.guo.crawler.util.WebAccessUtil;
+import com.chen.guo.crawler.model.StockWebPage;
+import com.chen.guo.crawler.util.WebAccessor;
 import org.apache.log4j.Logger;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -16,26 +17,27 @@ public class CfiNetIncomeTaskHist extends CfiNetIncomeBaseTask {
   private final int _startYear;
 
   /**
-   * @param startYear denotes the oldest year we care about. This startYear is inclusive
+   * Get all historical data
    */
-  public CfiNetIncomeTaskHist(int startYear) {
-    _startYear = startYear;
+  public CfiNetIncomeTaskHist(StockWebPage page, WebAccessor accessor) {
+    this(-1, page, accessor);
   }
 
   /**
-   * Get all historical data
+   * @param startYear denotes the oldest year we care about. This startYear is inclusive
    */
-  public CfiNetIncomeTaskHist() {
-    _startYear = -1;
+  public CfiNetIncomeTaskHist(int startYear, StockWebPage page, WebAccessor accessor) {
+    super(page, accessor);
+    _startYear = startYear;
   }
 
 
   @Override
-  public void scrape(String ticker, String url) throws IOException {
+  public TreeMap<Integer, Double> scrape(String url) throws IOException {
     Element mainTableBody = getMainTable(url);
     Element netProfitTr = mainTableBody.getElementsContainingOwnText(ROW_ID).first();
     String npPage = netProfitTr.absUrl("href");
-    Document netProfitPage = WebAccessUtil.getInstance().connect(npPage);
+    Document netProfitPage = _accessor.connect(npPage);
     //Get all historical
     Elements rows = netProfitPage.getElementById("content").getElementsByTag("tbody").first().children();
 
@@ -57,6 +59,6 @@ public class CfiNetIncomeTaskHist extends CfiNetIncomeBaseTask {
         break;
       }
     }
-    results.put(ticker, data);
+    return data;
   }
 }

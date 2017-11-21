@@ -1,8 +1,12 @@
 package com.chen.guo.crawler;
 
+import com.chen.guo.crawler.model.StockWebPage;
 import com.chen.guo.crawler.source.Scraper;
 import com.chen.guo.crawler.source.cfi.CfiScraper;
-import com.chen.guo.crawler.source.cfi.task.CfiNetIncomeTaskHist;
+import com.chen.guo.crawler.source.cfi.task.collector.ResultCollector;
+import com.chen.guo.crawler.source.cfi.task.creator.FullTaskCreator;
+
+import java.util.Arrays;
 
 public class Main {
   public static void main(String[] args) throws Exception {
@@ -23,9 +27,11 @@ public class Main {
     // ======== Refactoring END ========
 
     Scraper scraper = new CfiScraper();
-    CfiNetIncomeTaskHist task = new CfiNetIncomeTaskHist(2013);
-    //scraper.doScraping(Arrays.asList(new StockWebPage("捷成股份", "300182", "http://quote.cfi.cn/300182.html")), task);
-    scraper.doAllScraping(task);
-    //System.out.println(task.getTaskResults());
+    FullTaskCreator taskCreator = new FullTaskCreator();
+    ResultCollector collector = new ResultCollector();
+    scraper.doScraping(Arrays.asList(new StockWebPage("捷成股份", "300182", "http://quote.cfi.cn/300182.html")),
+        taskCreator, collector);
+    //scraper.doAllScraping(task);
+    collector.print();
   }
 }

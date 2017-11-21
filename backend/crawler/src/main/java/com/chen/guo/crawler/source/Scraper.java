@@ -1,10 +1,11 @@
 package com.chen.guo.crawler.source;
 
 import com.chen.guo.crawler.model.StockWebPage;
+import com.chen.guo.crawler.source.cfi.task.collector.ResultCollector;
+import com.chen.guo.crawler.source.cfi.task.creator.TaskCreator;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.util.List;
 
 public interface Scraper {
@@ -15,11 +16,11 @@ public interface Scraper {
    */
   List<StockWebPage> getProfilePages() throws IOException;
 
-  void doScraping(List<StockWebPage> pages, ScrapingTask scrapingTask) throws Exception;
+  void doScraping(List<StockWebPage> pages, TaskCreator<Integer, Double> taskCreator, ResultCollector collector) throws Exception;
 
-  default void doAllScraping(ScrapingTask scrapingTask) {
+  default void doAllScraping(TaskCreator<Integer, Double> taskCreator, ResultCollector collector) {
     try {
-      doScraping(getProfilePages(), scrapingTask);
+      doScraping(getProfilePages(), taskCreator, collector);
     } catch (Exception e) {
       logger.error(e.getMessage());
       throw new RuntimeException(e);

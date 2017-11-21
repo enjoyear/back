@@ -7,28 +7,28 @@ import org.jsoup.nodes.Element;
 
 import java.io.IOException;
 
-public class WebAccessUtil {
+public class WebAccessor {
   public static final int DEFAULT_CONNECTION_TIMEOUT = 5;
-  private static WebAccessUtil INSTANCE_DEFAULT;
+  private static WebAccessor INSTANCE_DEFAULT;
 
   private final int _connectionTimeout;
 
   static {
-    INSTANCE_DEFAULT = new WebAccessUtil();
+    INSTANCE_DEFAULT = new WebAccessor();
   }
 
   /**
-   * @return the WebAccessUtil instance with default connection timeout of 5 seconds.
+   * @return the WebAccessor instance with default connection timeout of 5 seconds.
    */
-  public static WebAccessUtil getInstance() {
+  public static WebAccessor getDefault() {
     return INSTANCE_DEFAULT;
   }
 
-  private WebAccessUtil() {
+  private WebAccessor() {
     this(DEFAULT_CONNECTION_TIMEOUT);
   }
 
-  public WebAccessUtil(Integer internetTimeoutSecond) {
+  public WebAccessor(Integer internetTimeoutSecond) {
     _connectionTimeout = internetTimeoutSecond * 1000;
   }
 

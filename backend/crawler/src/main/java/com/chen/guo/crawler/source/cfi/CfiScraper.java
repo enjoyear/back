@@ -3,7 +3,9 @@ package com.chen.guo.crawler.source.cfi;
 import com.chen.guo.crawler.model.StockWebPage;
 import com.chen.guo.crawler.source.Scraper;
 import com.chen.guo.crawler.source.ScrapingTask;
-import com.chen.guo.crawler.util.WebAccessUtil;
+import com.chen.guo.crawler.source.cfi.task.collector.ResultCollector;
+import com.chen.guo.crawler.source.cfi.task.creator.TaskCreator;
+import com.chen.guo.crawler.util.WebAccessor;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
@@ -28,6 +30,7 @@ public class CfiScraper implements Scraper {
   private static final Integer MAX_THREAD_COUNT = 8; //Should be configured to use the max count of cores of the machine
   private static final int MAX_RETRY_ROUNDS = 3;
   private static final int ROUND_TIME_OUT = 60;
+  private static final WebAccessor WEB_ACCESSOR = WebAccessor.getDefault();
 
   private final Retryer<Void> _retryer = RetryerBuilder.<Void>newBuilder().retryIfExceptionOfType(IOException.class)
       .withStopStrategy(StopStrategies.stopAfterAttempt(5))
@@ -68,7 +71,7 @@ public class CfiScraper implements Scraper {
   }
 
   private List<StockWebPage> getProfilePages(String listUrl) throws IOException {
-    Document listPage = WebAccessUtil.getInstance().connect(listUrl);
+    Document listPage = WEB_ACCESSOR.connect(listUrl);
     Element content = listPage.getElementById("divcontent");
     Element table = content.getElementsByTag("table").first().getElementsByTag("tbody").first();
     Elements rows = table.getElementsByTag("tr");
@@ -80,7 +83,7 @@ public class CfiScraper implements Scraper {
         int index = nameCode.indexOf("(");
         String code = nameCode.substring(index + 1, nameCode.length() - 1).trim();
         StockWebPage sp = new StockWebPage(
-            nameCode.substring(0, index).trim(), code, WebAccessUtil.getHyperlink(col));
+            nameCode.substring(0, index).trim(), code, WebAccessor.getHyperlink(col));
 
         if (checkForSWPCriteria(sp)) {
           //LOGGER.info(sp.toString());
@@ -94,30 +97,33 @@ public class CfiScraper implements Scraper {
   }
 
   @Override
-  public void doScraping(List<StockWebPage> pages, ScrapingTask scrapingTask) throws InterruptedException {
-    Queue<StockWebPage> jobs = new ArrayDeque<>(pages);
+  public void doScraping(List<StockWebPage> pages, TaskCreator<Integer, Double> taskCreator, ResultCollector collector)
+      throws InterruptedException {
+    Queue<ScrapingTask<Integer, Double>> jobs = new ArrayDeque<>(pages.size());
+    for (StockWebPage page : pages) {
+      jobs.add(taskCreator.createTask(page, WEB_ACCESSOR));
+    }
+
     long startTime = System.currentTimeMillis();
     int r = 0; //indicates current round.
 
     while (r <= MAX_RETRY_ROUNDS) {
-      WebAccessUtil webUtil = WebAccessUtil.getInstance();
-      if (r > 0) {
-        webUtil = new WebAccessUtil(10 * r);
-      }
+      final WebAccessor accessor = r == 0 ? WEB_ACCESSOR : new WebAccessor(10 * r);
 
-      ConcurrentLinkedQueue<StockWebPage> failed = new ConcurrentLinkedQueue<>();
+      ConcurrentLinkedQueue<ScrapingTask<Integer, Double>> failed = new ConcurrentLinkedQueue<>();
       ExecutorService es = Executors.newFixedThreadPool(MAX_THREAD_COUNT);
 
       while (!jobs.isEmpty()) {
-        StockWebPage job = jobs.poll();
+        final ScrapingTask<Integer, Double> job = jobs.poll();
         es.submit(new Runnable() {
           @Override
           public void run() {
             try {
-              scrapingTask.scrape(job);
+              TreeMap<Integer, Double> result = job.scrape();
+              collector.collect(job.getPage(), result);
               LOGGER.info("Finished " + job);
             } catch (IOException e) {
-              failed.add(job);
+              failed.add(taskCreator.createTask(job.getPage(), accessor));
             }
           }
         });
@@ -147,11 +153,12 @@ public class CfiScraper implements Scraper {
       throw new RuntimeException(String.format(
           "Cfi scraping failed after %d retries for the following pages\n%s", MAX_RETRY_ROUNDS, printFailedPagesList(jobs)));
     }
+
   }
 
-  private String printFailedPagesList(Collection<StockWebPage> failed) {
+  private String printFailedPagesList(Collection<ScrapingTask<Integer, Double>> failed) {
     return String.format("Failed to download %d pages:\n%s", failed.size(),
-        String.join(",", failed.stream().map(StockWebPage::toString).collect(Collectors.toList())));
+        String.join(",", failed.stream().map(x -> x.getPage().toString()).collect(Collectors.toList())));
   }
 
   /**
