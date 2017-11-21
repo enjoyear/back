@@ -1,4 +1,5 @@
 rootProject.name = 'back'
 
 include 'crawler'
+include 'util'
 
