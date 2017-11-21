@@ -33,11 +33,11 @@ public abstract class CfiNetIncomeBaseTask extends ScrapingTask<Integer, Double>
 
   @Override
   public TreeMap<Integer, Double> scrape() throws IOException {
-    String pageToScrape = _menuTask.getPage(_page);
-    return scrape(pageToScrape);
+    String url财务分析指标 = _menuTask.getPage(_page);
+    return scrapeMenuPage(url财务分析指标);
   }
 
-  protected abstract TreeMap<Integer, Double> scrape(String url财务分析指标) throws IOException;
+  protected abstract TreeMap<Integer, Double> scrapeMenuPage(String menuPage) throws IOException;
 
   /**
    * Get the page element for the table body of the main content

@@ -1,5 +1,6 @@
 package com.chen.guo.crawler.source.cfi.task;
 
+import com.chen.guo.common.DateTimeUtil;
 import com.chen.guo.crawler.model.StockWebPage;
 import com.chen.guo.crawler.util.WebAccessor;
 import org.apache.log4j.Logger;
@@ -33,7 +34,7 @@ public class CfiNetIncomeTaskHist extends CfiNetIncomeBaseTask {
 
 
   @Override
-  public TreeMap<Integer, Double> scrape(String url) throws IOException {
+  public TreeMap<Integer, Double> scrapeMenuPage(String url) throws IOException {
     Element mainTableBody = getMainTable(url);
     Element netProfitTr = mainTableBody.getElementsContainingOwnText(ROW_ID).first();
     String npPage = netProfitTr.absUrl("href");
@@ -52,7 +53,7 @@ public class CfiNetIncomeTaskHist extends CfiNetIncomeBaseTask {
     for (int r = 2; r < rows.size() - 1; ++r) {
       Element row = rows.get(r);
       Elements children = row.children();
-      LocalDate date = getDate(children.get(0).text());
+      LocalDate date = DateTimeUtil.getDate(children.get(0).text(), DEFAULT_DATE_PATTERN);
       if (date.getYear() >= _startYear) {
         data.put(date.getYear() * 100 + date.getMonthValue(), Double.valueOf(children.get(1).text()));
       } else {
