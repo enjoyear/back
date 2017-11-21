@@ -4,34 +4,23 @@ import com.chen.guo.crawler.model.StockWebPage;
 import com.chen.guo.crawler.source.Scraper;
 import com.chen.guo.crawler.source.ScrapingTask;
 import com.chen.guo.crawler.util.WebAccessUtil;
-import com.github.rholder.retry.Retryer;
-import com.github.rholder.retry.RetryerBuilder;
-import com.github.rholder.retry.StopStrategies;
-import com.github.rholder.retry.WaitStrategies;
 import org.apache.log4j.Logger;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class CfiScraper implements Scraper {
-  private static final Logger LOGGER = Logger.getLogger(CfiScraper.class);
+public class CfiScraper_Deprecated implements Scraper {
+  private static final Logger LOGGER = Logger.getLogger(CfiScraper_Deprecated.class);
   private static final Pattern ALL_DIGITS = Pattern.compile("\\d{6}");
   private static final Integer MAX_THREAD_COUNT = 8; //Should be configured to use the max count of cores of the machine
-  private static final int MAX_RETRY_ROUNDS = 3;
-  private static final int ROUND_TIME_OUT = 60;
-
-  private final Retryer<Void> _retryer = RetryerBuilder.<Void>newBuilder().retryIfExceptionOfType(IOException.class)
-      .withStopStrategy(StopStrategies.stopAfterAttempt(5))
-      .withWaitStrategy(WaitStrategies.fixedWait(1, TimeUnit.SECONDS)).build();
+  private static final WebAccessUtil WEB_PAGE_UTIL = WebAccessUtil.getInstance();
 
   @Override
   public List<StockWebPage> getProfilePages() {
@@ -68,7 +57,7 @@ public class CfiScraper implements Scraper {
   }
 
   private List<StockWebPage> getProfilePages(String listUrl) throws IOException {
-    Document listPage = WebAccessUtil.getInstance().connect(listUrl);
+    Document listPage = WEB_PAGE_UTIL.connect(listUrl);
     Element content = listPage.getElementById("divcontent");
     Element table = content.getElementsByTag("table").first().getElementsByTag("tbody").first();
     Elements rows = table.getElementsByTag("tr");
@@ -94,58 +83,35 @@ public class CfiScraper implements Scraper {
   }
 
   @Override
-  public void doScraping(List<StockWebPage> pages, ScrapingTask scrapingTask) throws InterruptedException {
-    Queue<StockWebPage> jobs = new ArrayDeque<>(pages);
+  public void doScraping(List<StockWebPage> pages, ScrapingTask scrapingTask) throws ConnectException {
+    int retryCount = 3;
+    List<StockWebPage> jobs = pages;
     long startTime = System.currentTimeMillis();
-    int r = 0; //indicates current round.
 
-    while (r <= MAX_RETRY_ROUNDS) {
-      WebAccessUtil webUtil = WebAccessUtil.getInstance();
-      if (r > 0) {
-        webUtil = new WebAccessUtil(10 * r);
-      }
+    ForkJoinPool pool = new ForkJoinPool(MAX_THREAD_COUNT);
+    WebAccessUtil localWebUtil = WEB_PAGE_UTIL;
+    WebAccessUtil webUtil20 = new WebAccessUtil(20);
 
+    while (!jobs.isEmpty() && retryCount > 0) {
       ConcurrentLinkedQueue<StockWebPage> failed = new ConcurrentLinkedQueue<>();
-      ExecutorService es = Executors.newFixedThreadPool(MAX_THREAD_COUNT);
+      pool.invoke(new CfiScrapingAsyncAction_Deprecated(scrapingTask, jobs, failed, localWebUtil));
+      LOGGER.info(
+          String.format("%d out of %d pages failed. Retrying(%d) with longer connection timeout...",
+              failed.size(), jobs.size(), retryCount));
 
-      while (!jobs.isEmpty()) {
-        StockWebPage job = jobs.poll();
-        es.submit(new Runnable() {
-          @Override
-          public void run() {
-            try {
-              scrapingTask.scrape(job);
-              LOGGER.info("Finished " + job);
-            } catch (IOException e) {
-              failed.add(job);
-            }
-          }
-        });
+      jobs = new ArrayList<>();
+      if (!failed.isEmpty()) {
+        --retryCount;
+        localWebUtil = webUtil20; //set longer connection time
+        LOGGER.warn(printFailedPagesList(failed));
+        jobs.addAll(failed);
       }
-
-      LOGGER.info(String.format("Submitted all jobs at round %d.", r));
-
-      es.shutdown(); //stop accepting new requests
-      boolean terminated = es.awaitTermination(ROUND_TIME_OUT, TimeUnit.MINUTES);
-      if (!terminated) {
-        es.shutdownNow();
-        throw new RuntimeException(String.format("Timed out while doing Cfi scraping at round %d.", r));
-      }
-
-      if (failed.isEmpty()) {
-        break;
-      }
-
-      LOGGER.info(String.format("%d out of %d pages failed. Will retry(current %d) with longer connection timeout...",
-          failed.size(), jobs.size(), r));
-      jobs = new ArrayDeque<>(failed);
-      ++r;
     }
 
-    LOGGER.info("Whole cfi scraping process took " + (System.currentTimeMillis() - startTime) / 1000 + " seconds to finish");
-    if (!jobs.isEmpty()) {
-      throw new RuntimeException(String.format(
-          "Cfi scraping failed after %d retries for the following pages\n%s", MAX_RETRY_ROUNDS, printFailedPagesList(jobs)));
+    LOGGER.info("Whole process took " + (System.currentTimeMillis() - startTime) / 1000 + " seconds to finish");
+
+    if (!jobs.isEmpty() && retryCount == 0) {
+      throw new ConnectException(printFailedPagesList(jobs));
     }
   }
 
@@ -187,5 +153,9 @@ public class CfiScraper implements Scraper {
    */
   public static boolean checkForCodeCriteria(String str) {
     return ALL_DIGITS.matcher(str).matches();
+  }
+
+  public static void main(String[] args) throws Exception {
+    new CfiScraper_Deprecated().getProfilePages();
   }
 }

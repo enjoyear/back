@@ -15,12 +15,12 @@ public interface Scraper {
    */
   List<StockWebPage> getProfilePages() throws IOException;
 
-  void doScraping(List<StockWebPage> pages, ScrapingTask scrapingTask) throws ConnectException;
+  void doScraping(List<StockWebPage> pages, ScrapingTask scrapingTask) throws Exception;
 
   default void doAllScraping(ScrapingTask scrapingTask) {
     try {
       doScraping(getProfilePages(), scrapingTask);
-    } catch (IOException e) {
+    } catch (Exception e) {
       logger.error(e.getMessage());
       throw new RuntimeException(e);
     }

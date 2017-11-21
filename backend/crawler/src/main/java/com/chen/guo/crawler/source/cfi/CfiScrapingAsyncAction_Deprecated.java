@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.RecursiveAction;
 
-class CfiScrapingAsyncAction extends RecursiveAction {
-  private static final Logger logger = Logger.getLogger(CfiScrapingAsyncAction.class);
+class CfiScrapingAsyncAction_Deprecated extends RecursiveAction {
+  private static final Logger logger = Logger.getLogger(CfiScrapingAsyncAction_Deprecated.class);
   private ConcurrentLinkedQueue<StockWebPage> failedPages;
   private final WebAccessUtil webUtil;
   private final ScrapingTask task;
@@ -24,8 +24,8 @@ class CfiScrapingAsyncAction extends RecursiveAction {
    * @param pages       Keep all tasks to do. pages must be random accessible.
    * @param failedPages As a return value
    */
-  public CfiScrapingAsyncAction(ScrapingTask task, List<StockWebPage> pages,
-                                ConcurrentLinkedQueue<StockWebPage> failedPages) {
+  public CfiScrapingAsyncAction_Deprecated(ScrapingTask task, List<StockWebPage> pages,
+                                           ConcurrentLinkedQueue<StockWebPage> failedPages) {
     this(task, pages, 0, pages.size(), failedPages, WebAccessUtil.getInstance());
   }
 
@@ -33,8 +33,8 @@ class CfiScrapingAsyncAction extends RecursiveAction {
    * @param pages       Keep all tasks to do. pages must be random accessible.
    * @param failedPages As a return value
    */
-  public CfiScrapingAsyncAction(ScrapingTask task, List<StockWebPage> pages,
-                                ConcurrentLinkedQueue<StockWebPage> failedPages, WebAccessUtil webUtil) {
+  public CfiScrapingAsyncAction_Deprecated(ScrapingTask task, List<StockWebPage> pages,
+                                           ConcurrentLinkedQueue<StockWebPage> failedPages, WebAccessUtil webUtil) {
     this(task, pages, 0, pages.size(), failedPages, webUtil);
   }
 
@@ -44,8 +44,8 @@ class CfiScrapingAsyncAction extends RecursiveAction {
    * @param high        Exclusive high end
    * @param failedPages As a return value
    */
-  public CfiScrapingAsyncAction(ScrapingTask task, List<StockWebPage> pages, int low, int high,
-                                ConcurrentLinkedQueue<StockWebPage> failedPages, WebAccessUtil webUtil) {
+  public CfiScrapingAsyncAction_Deprecated(ScrapingTask task, List<StockWebPage> pages, int low, int high,
+                                           ConcurrentLinkedQueue<StockWebPage> failedPages, WebAccessUtil webUtil) {
     this.task = task;
     this.pages = pages;
     this.low = low;
@@ -70,8 +70,8 @@ class CfiScrapingAsyncAction extends RecursiveAction {
       int mid = (low + high) >>> 1;
       //Divide and conquer
       invokeAll(
-          new CfiScrapingAsyncAction(task, pages, low, mid, failedPages, webUtil),
-          new CfiScrapingAsyncAction(task, pages, mid, high, failedPages, webUtil));
+          new CfiScrapingAsyncAction_Deprecated(task, pages, low, mid, failedPages, webUtil),
+          new CfiScrapingAsyncAction_Deprecated(task, pages, mid, high, failedPages, webUtil));
     }
   }
 }
