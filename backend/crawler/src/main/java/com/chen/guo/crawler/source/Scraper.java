@@ -16,9 +16,9 @@ public interface Scraper {
    */
   List<StockWebPage> getProfilePages() throws IOException;
 
-  void doScraping(List<StockWebPage> pages, TaskCreator<Integer, Double> taskCreator, ResultCollector collector) throws Exception;
+  void doScraping(List<StockWebPage> pages, TaskCreator taskCreator, ResultCollector collector) throws Exception;
 
-  default void doAllScraping(TaskCreator<Integer, Double> taskCreator, ResultCollector collector) {
+  default void doAllScraping(List<StockWebPage> pages, TaskCreator taskCreator, ResultCollector collector) {
     try {
       doScraping(getProfilePages(), taskCreator, collector);
     } catch (Exception e) {

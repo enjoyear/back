@@ -2,7 +2,7 @@ package com.chen.guo.crawler.source.cfi;
 
 import com.chen.guo.crawler.model.StockWebPage;
 import com.chen.guo.crawler.source.Scraper;
-import com.chen.guo.crawler.source.ScrapingTask;
+import com.chen.guo.crawler.source.cfi.task.QuarterlyBasedTask;
 import com.chen.guo.crawler.source.cfi.task.collector.ResultCollector;
 import com.chen.guo.crawler.source.cfi.task.creator.TaskCreator;
 import com.chen.guo.crawler.util.WebAccessor;
@@ -97,9 +97,9 @@ public class CfiScraper implements Scraper {
   }
 
   @Override
-  public void doScraping(List<StockWebPage> pages, TaskCreator<Integer, Double> taskCreator, ResultCollector collector)
+  public void doScraping(List<StockWebPage> pages, TaskCreator taskCreator, ResultCollector collector)
       throws InterruptedException {
-    Queue<ScrapingTask<Integer, Double>> jobs = new ArrayDeque<>(pages.size());
+    Queue<QuarterlyBasedTask> jobs = new ArrayDeque<>(pages.size());
     for (StockWebPage page : pages) {
       jobs.add(taskCreator.createTask(page, WEB_ACCESSOR));
     }
@@ -110,16 +110,16 @@ public class CfiScraper implements Scraper {
     while (r <= MAX_RETRY_ROUNDS) {
       final WebAccessor accessor = r == 0 ? WEB_ACCESSOR : new WebAccessor(10 * r);
 
-      ConcurrentLinkedQueue<ScrapingTask<Integer, Double>> failed = new ConcurrentLinkedQueue<>();
+      ConcurrentLinkedQueue<QuarterlyBasedTask> failed = new ConcurrentLinkedQueue<>();
       ExecutorService es = Executors.newFixedThreadPool(MAX_THREAD_COUNT);
 
       while (!jobs.isEmpty()) {
-        final ScrapingTask<Integer, Double> job = jobs.poll();
+        final QuarterlyBasedTask job = jobs.poll();
         es.submit(new Runnable() {
           @Override
           public void run() {
             try {
-              TreeMap<Integer, Double> result = job.scrape();
+              Map<Integer, Map<String, Double>> result = job.scrape();
               collector.collect(job.getPage(), result);
               LOGGER.info("Finished " + job);
             } catch (IOException e) {
@@ -156,7 +156,7 @@ public class CfiScraper implements Scraper {
 
   }
 
-  private String printFailedPagesList(Collection<ScrapingTask<Integer, Double>> failed) {
+  private String printFailedPagesList(Collection<QuarterlyBasedTask> failed) {
     return String.format("Failed to download %d pages:\n%s", failed.size(),
         String.join(",", failed.stream().map(x -> x.getPage().toString()).collect(Collectors.toList())));
   }

@@ -8,6 +8,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeMap;
 
 public class CfiNetIncomeTaskLatest extends CfiNetIncomeBaseTask {
@@ -26,6 +29,7 @@ public class CfiNetIncomeTaskLatest extends CfiNetIncomeBaseTask {
       throw new RuntimeException(String.format("Expected the header line 截止日期, but getting %s for the url %s",
           headerRow.first().ownText(), menuPage));
     }
+
     Element netProfitTr = table.getElementsContainingOwnText(ROW_ID).first();
     Elements netProfitRow = netProfitTr.parent().parent().children();
     for (int i = 1; i < headerRow.size(); ++i) {
