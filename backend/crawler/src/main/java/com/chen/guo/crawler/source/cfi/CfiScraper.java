@@ -1,5 +1,6 @@
 package com.chen.guo.crawler.source.cfi;
 
+import com.chen.guo.common.exception.ExceptionUtil;
 import com.chen.guo.crawler.model.StockWebPage;
 import com.chen.guo.crawler.source.Scraper;
 import com.chen.guo.crawler.source.cfi.task.QuarterlyBasedTask;
@@ -126,7 +127,7 @@ public class CfiScraper implements Scraper {
             } catch (IOException e) {
               retries.add(taskCreator.createTask(job.getPage(), accessor));
             } catch (Exception e) {
-              failed.add(String.format("%s failed:\n%s", job.getPage(), e.getMessage()));
+              failed.add(String.format("%s failed:\n%s", job.getPage(), ExceptionUtil.getExceptionStackTrace(e)));
             }
           }
         });
