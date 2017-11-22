@@ -1,6 +1,7 @@
 package com.chen.guo.crawler.source.cfi.task;
 
 import com.chen.guo.common.date.DateTimeUtil;
+import com.chen.guo.common.number.DoubleUtil;
 import com.chen.guo.crawler.model.StockWebPage;
 import com.chen.guo.crawler.util.WebAccessor;
 import org.jsoup.nodes.Element;
@@ -33,13 +34,13 @@ public class IncomeStatementTaskHist extends IncomeStatementTask {
     Element table = connectAndGetContentTable(menuPage);
     validateHeader(menuPage, table);
 
-    HashMap<String, Element> selectedRows = getSelectedRows(table);
+    HashMap<String, Elements> selectedRows = getSelectedRows(table);
     TreeMap<Integer, Map<String, Double>> results = new TreeMap<>();
 
-    for (Map.Entry<String, Element> rowEntry : selectedRows.entrySet()) {
+    for (Map.Entry<String, Elements> rowEntry : selectedRows.entrySet()) {
       String name = rowEntry.getKey();
-      Element row = rowEntry.getValue();
-      String detailsPageUrl = row.absUrl("href");
+      Elements columns = rowEntry.getValue();
+      String detailsPageUrl = columns.get(0).child(0).absUrl("href");
 
       Element detailsTable = connectAndGetContentTable(detailsPageUrl);
       //Get all historical data
@@ -63,8 +64,8 @@ public class IncomeStatementTaskHist extends IncomeStatementTask {
         }
 
         int yearMonthKey = date.getYear() * 100 + date.getMonthValue();
-        Map<String, Double> data = results.putIfAbsent(yearMonthKey, new HashMap<>());
-        data.put(name, Double.valueOf(detailColumns.get(1).text()));
+        Map<String, Double> data = results.computeIfAbsent(yearMonthKey, x -> new HashMap<>());
+        data.put(name, DoubleUtil.parse(detailColumns.get(1).text()));
       }
     }
     return results;

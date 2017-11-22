@@ -45,14 +45,14 @@ public abstract class IncomeStatementTask implements QuarterlyBasedTask {
    *
    * @return a hashmap: RowName => Row Columns
    */
-  protected HashMap<String, Element> getSelectedRows(Element table) {
+  protected HashMap<String, Elements> getSelectedRows(Element table) {
     Set<String> rowsWanted = new HashSet<>(_wantedRows);
-    HashMap<String, Element> selectedRows = new HashMap<>();
+    HashMap<String, Elements> selectedRows = new HashMap<>();
     for (Element row : table.children()) {
       Elements children = row.children();
       String rowName = children.get(0).text().trim();
       if (rowsWanted.contains(rowName)) {
-        selectedRows.put(rowName, row);
+        selectedRows.put(rowName, children);
         rowsWanted.remove(rowName);
       }
       if (rowsWanted.isEmpty())

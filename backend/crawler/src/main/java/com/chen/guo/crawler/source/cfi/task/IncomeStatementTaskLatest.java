@@ -28,16 +28,16 @@ public class IncomeStatementTaskLatest extends IncomeStatementTask {
   public TreeMap<Integer, Map<String, Double>> scrape(String menuPage) throws IOException {
     Element table = connectAndGetContentTable(menuPage);
     Elements headerRow = validateHeader(menuPage, table);
-    HashMap<String, Element> selectedRows = getSelectedRows(table);
+    HashMap<String, Elements> selectedRows = getSelectedRows(table);
 
     //Add all wanted rows' values to a map
     TreeMap<Integer, Map<String, Double>> results = new TreeMap<>();
     for (int col = 1; col < headerRow.size(); ++col) {
       int yearMonthInt = DateTimeUtil.getYearMonthInt(headerRow.get(col).text(), DEFAULT_DATE_PATTERN);
       Map<String, Double> quarterlyNumbers = new HashMap<>();
-      for (Map.Entry<String, Element> row : selectedRows.entrySet()) {
+      for (Map.Entry<String, Elements> row : selectedRows.entrySet()) {
         String rowName = row.getKey();
-        Element column = row.getValue().children().get(col);
+        Element column = row.getValue().get(col);
         quarterlyNumbers.put(rowName, DoubleUtil.parse(column.text()));
       }
       results.put(yearMonthInt, quarterlyNumbers);

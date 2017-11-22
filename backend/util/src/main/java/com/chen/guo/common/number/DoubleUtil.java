@@ -10,6 +10,10 @@ public class DoubleUtil {
    * 0.25（万元）
    */
   public static Double parse(String str) {
+    if (str == null || str.trim().isEmpty()) {
+      return null;
+    }
+
     try {
       return Double.valueOf(str);
     } catch (NumberFormatException e) {
