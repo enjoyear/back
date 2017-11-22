@@ -17,6 +17,7 @@ public class FullTaskCreator implements TaskCreator {
     Set<String> rowNames = new HashSet<>();
     rowNames.add("一、营业总收入");
     rowNames.add("归属于母公司所有者的净利润");
+    rowNames.add("稀释每股收益");
 
     return new IncomeStatementTaskLatest(page, accessor, rowNames);
   }

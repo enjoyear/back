@@ -1,16 +1,14 @@
 package com.chen.guo.crawler.source.cfi.task;
 
-import com.chen.guo.common.DateTimeUtil;
+import com.chen.guo.common.date.DateTimeUtil;
+import com.chen.guo.common.number.DoubleUtil;
 import com.chen.guo.crawler.model.StockWebPage;
 import com.chen.guo.crawler.util.WebAccessor;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class IncomeStatementTaskLatest extends IncomeStatementTask {
   public IncomeStatementTaskLatest(StockWebPage page, WebAccessor accessor, Set<String> rowNames) {
@@ -18,7 +16,7 @@ public class IncomeStatementTaskLatest extends IncomeStatementTask {
   }
 
   @Override
-  public Map<Integer, Map<String, Double>> scrape(String menuPage) throws IOException {
+  public TreeMap<Integer, Map<String, Double>> scrape(String menuPage) throws IOException {
     Element table = getMainTable(menuPage);
     Elements headerRow = validateHeader(menuPage, table);
 
@@ -35,19 +33,20 @@ public class IncomeStatementTaskLatest extends IncomeStatementTask {
         break;
     }
 
-    Map<Integer, Map<String, Double>> results = new HashMap<>();
+    TreeMap<Integer, Map<String, Double>> results = new TreeMap<>();
     for (int i = 1; i < headerRow.size(); ++i) {
       int yearMonthInt = DateTimeUtil.getYearMonthInt(headerRow.get(i).text(), DEFAULT_DATE_PATTERN);
       Map<String, Double> quarterlyNumbers = new HashMap<>();
       for (Map.Entry<String, Elements> row : selectedRows.entrySet()) {
         String rowName = row.getKey();
         Elements columns = row.getValue();
-        quarterlyNumbers.put(rowName, Double.valueOf(columns.get(i).text()));
+        quarterlyNumbers.put(rowName, DoubleUtil.parse(columns.get(i).text()));
       }
       results.put(yearMonthInt, quarterlyNumbers);
     }
     return results;
   }
+
 
   private Elements validateHeader(String menuPage, Element table) {
     Element yearMonthTr = table.getElementsByTag("tr").get(1);

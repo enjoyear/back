@@ -104,13 +104,14 @@ public class CfiScraper implements Scraper {
       jobs.add(taskCreator.createTask(page, WEB_ACCESSOR));
     }
 
+    List<String> failed = Collections.synchronizedList(new ArrayList<String>());
     long startTime = System.currentTimeMillis();
     int r = 0; //indicates current round.
 
     while (r <= MAX_RETRY_ROUNDS) {
       final WebAccessor accessor = r == 0 ? WEB_ACCESSOR : new WebAccessor(10 * r);
 
-      ConcurrentLinkedQueue<QuarterlyBasedTask> failed = new ConcurrentLinkedQueue<>();
+      ConcurrentLinkedQueue<QuarterlyBasedTask> retries = new ConcurrentLinkedQueue<>();
       ExecutorService es = Executors.newFixedThreadPool(MAX_THREAD_COUNT);
 
       while (!jobs.isEmpty()) {
@@ -123,7 +124,9 @@ public class CfiScraper implements Scraper {
               collector.collect(job.getPage(), result);
               LOGGER.info("Finished " + job);
             } catch (IOException e) {
-              failed.add(taskCreator.createTask(job.getPage(), accessor));
+              retries.add(taskCreator.createTask(job.getPage(), accessor));
+            } catch (Exception e) {
+              failed.add(String.format("%s failed:\n%s", job.getPage(), e.getMessage()));
             }
           }
         });
@@ -138,13 +141,13 @@ public class CfiScraper implements Scraper {
         throw new RuntimeException(String.format("Timed out while doing Cfi scraping at round %d.", r));
       }
 
-      if (failed.isEmpty()) {
+      if (retries.isEmpty()) {
         break;
       }
 
-      LOGGER.info(String.format("%d out of %d pages failed. Will retry(current %d) with longer connection timeout...",
-          failed.size(), jobs.size(), r));
-      jobs = new ArrayDeque<>(failed);
+      LOGGER.info(String.format("%d out of %d pages retries. Will retry(current %d) with longer connection timeout...",
+          retries.size(), jobs.size(), r));
+      jobs = new ArrayDeque<>(retries);
       ++r;
     }
 
@@ -153,7 +156,10 @@ public class CfiScraper implements Scraper {
       throw new RuntimeException(String.format(
           "Cfi scraping failed after %d retries for the following pages\n%s", MAX_RETRY_ROUNDS, printFailedPagesList(jobs)));
     }
-
+    if (!failed.isEmpty()) {
+      throw new RuntimeException(String.format(
+          "Following jobs permanently failed:\n%s", Arrays.toString(failed.toArray())));
+    }
   }
 
   private String printFailedPagesList(Collection<QuarterlyBasedTask> failed) {

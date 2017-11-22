@@ -1,6 +1,6 @@
 package com.chen.guo.crawler.source.cfi.task;
 
-import com.chen.guo.common.DateTimeUtil;
+import com.chen.guo.common.date.DateTimeUtil;
 import com.chen.guo.crawler.model.StockWebPage;
 import com.chen.guo.crawler.util.WebAccessor;
 import org.apache.log4j.Logger;

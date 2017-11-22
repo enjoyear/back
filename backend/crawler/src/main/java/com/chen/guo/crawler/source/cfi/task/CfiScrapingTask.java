@@ -4,6 +4,7 @@ import com.chen.guo.crawler.model.StockWebPage;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.TreeMap;
 
 public interface CfiScrapingTask {
   String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
@@ -20,7 +21,7 @@ public interface CfiScrapingTask {
    */
   String navigate() throws IOException;
 
-  Map<Integer, Map<String, Double>> scrape(String menuPage) throws IOException;
+  TreeMap<Integer, Map<String, Double>> scrape(String menuPage) throws IOException;
 
   default Map<Integer, Map<String, Double>> scrape() throws IOException {
     String url = navigate();
