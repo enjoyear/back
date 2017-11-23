@@ -1,5 +1,6 @@
 dependencies {
     compile project(':util')
+    compile project(':accounting-util')
     compile group: 'org.jsoup', name: 'jsoup', version: '1.11.1'
 }
 

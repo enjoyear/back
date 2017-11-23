@@ -29,6 +29,10 @@ public class IncomeStatementTaskHist extends IncomeStatementTask {
     _startYear = startYear;
   }
 
+  public IncomeStatementTaskHist(StockWebPage page, WebAccessor accessor, Set<String> rowNames) {
+    this(0, page, accessor, rowNames);
+  }
+
   @Override
   public TreeMap<Integer, Map<String, Double>> scrape(String menuPage) throws IOException {
     Element table = connectAndGetContentTable(menuPage);

@@ -121,7 +121,7 @@ public class CfiScraper implements Scraper {
           @Override
           public void run() {
             try {
-              Map<Integer, Map<String, Double>> result = job.scrape();
+              TreeMap<Integer, Map<String, Double>> result = job.scrape();
               collector.collect(job.getPage(), result);
               LOGGER.info("Finished " + job);
             } catch (IOException e) {

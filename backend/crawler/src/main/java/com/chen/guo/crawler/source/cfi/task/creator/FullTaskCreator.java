@@ -18,6 +18,6 @@ public class FullTaskCreator implements TaskCreator {
     rowNames.add("归属于母公司所有者的净利润");
     rowNames.add("稀释每股收益");
 
-    return new IncomeStatementTaskHist(2013, page, accessor, rowNames);
+    return new IncomeStatementTaskHist(page, accessor, rowNames);
   }
 }

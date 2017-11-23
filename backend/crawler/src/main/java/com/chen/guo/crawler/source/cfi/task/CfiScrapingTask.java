@@ -28,7 +28,7 @@ public interface CfiScrapingTask {
 
   WebAccessor getWebAccessor();
 
-  default Map<Integer, Map<String, Double>> scrape() throws IOException {
+  default TreeMap<Integer, Map<String, Double>> scrape() throws IOException {
     String url = navigate();
     return scrape(url);
   }
