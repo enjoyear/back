@@ -22,16 +22,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class CfiScraper implements Scraper {
   private static final Logger LOGGER = Logger.getLogger(CfiScraper.class);
-  private static final Pattern ALL_DIGITS = Pattern.compile("\\d{6}");
   private static final Integer MAX_THREAD_COUNT = 8; //Should be configured to use the max count of cores of the machine
   private static final int MAX_RETRY_ROUNDS = 3;
   private static final int ROUND_TIME_OUT = 60;
-  private static final WebAccessor WEB_ACCESSOR = WebAccessor.getDefault();
 
   private final Retryer<Void> _retryer = RetryerBuilder.<Void>newBuilder().retryIfExceptionOfType(IOException.class)
       .withStopStrategy(StopStrategies.stopAfterAttempt(5))
@@ -86,7 +83,7 @@ public class CfiScraper implements Scraper {
         StockWebPage sp = new StockWebPage(
             nameCode.substring(0, index).trim(), code, WebAccessor.getHyperlink(col));
 
-        if (checkForSWPCriteria(sp)) {
+        if (Scraper.checkForSWPCriteria(sp)) {
           //LOGGER.info(sp.toString());
           interestedPages.add(sp);
         } else {
@@ -167,40 +164,5 @@ public class CfiScraper implements Scraper {
   private String printFailedPagesList(Collection<CfiScrapingTask> failed) {
     return String.format("Failed to download %d pages:\n%s", failed.size(),
         String.join(",", failed.stream().map(x -> x.getPage().toString()).collect(Collectors.toList())));
-  }
-
-  /**
-   * Exclude all ST, *ST, s*st
-   */
-  static boolean checkForSWPCriteria(StockWebPage sp) {
-    String code = sp.getCode();
-    if (code.startsWith("0") ||
-        code.startsWith("6") ||
-        (code.startsWith("3") && !code.startsWith("39"))) {
-      if (checkForCodeCriteria(code)) {
-        //Exclude when the name is too long
-        if (sp.getName().length() > 4 &&
-            !sp.getName().equals("TCL集团")) {
-          if (!sp.getName().toLowerCase().startsWith("*st"))
-            LOGGER.info("Exclude: " + sp);
-          return false;
-        }
-
-        //Exclude ST
-        if (sp.getName().toLowerCase().startsWith("st")) {
-          return false;
-        }
-
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Make sure a 6-digit code
-   */
-  public static boolean checkForCodeCriteria(String str) {
-    return ALL_DIGITS.matcher(str).matches();
   }
 }
