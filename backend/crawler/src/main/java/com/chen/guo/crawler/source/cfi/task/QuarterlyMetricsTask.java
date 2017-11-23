@@ -15,11 +15,7 @@ public abstract class QuarterlyMetricsTask implements CfiScrapingTask {
   protected final StockWebPage _page;
   protected final WebAccessor _accessor;
   protected final Set<String> _wantedRows;
-  //Used for searching.
-  private final String _menuId;
-  //Used for validation, could be used for searching as well. It's more complete than ROW_ID.
-  private final String _menuName;
-  private final CfiMenuClickTask _menuTask;
+  protected CfiMenuNavigator _navigator;
 
   /**
    * @param page
@@ -27,18 +23,16 @@ public abstract class QuarterlyMetricsTask implements CfiScrapingTask {
    * @param wantedRows provide a set of the metrics you are interested in
    */
   protected QuarterlyMetricsTask(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
-                                 String menuId, String menuName) {
+                                 CfiMenuNavigator navigator) {
     _page = page;
     _accessor = accessor;
     _wantedRows = Collections.unmodifiableSet(wantedRows);
-    _menuId = menuId;
-    _menuName = menuName;
-    _menuTask = new CfiMenuClickTask(menuId, menuName, accessor);
+    _navigator = navigator;
   }
 
   @Override
   public String navigate() throws IOException {
-    return _menuTask.getPage(_page);
+    return _navigator.navigate(_page);
   }
 
   /**
@@ -81,8 +75,8 @@ public abstract class QuarterlyMetricsTask implements CfiScrapingTask {
   }
 
   @Override
-  public String getMenuName() {
-    return _menuName;
+  public CfiMenuNavigator getNavigator() {
+    return _navigator;
   }
 
   @Override

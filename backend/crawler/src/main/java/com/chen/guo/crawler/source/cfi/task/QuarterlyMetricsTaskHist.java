@@ -24,14 +24,14 @@ public class QuarterlyMetricsTaskHist extends QuarterlyMetricsTask {
    * @param wantedRows provide a set of rows you want to fetch
    */
   public QuarterlyMetricsTaskHist(int startYear, StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
-                                  String menuId, String menuName) {
-    super(page, accessor, wantedRows, menuId, menuName);
+                                  CfiMenuNavigator menuNavigator) {
+    super(page, accessor, wantedRows, menuNavigator);
     _startYear = startYear;
   }
 
   public QuarterlyMetricsTaskHist(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
-                                  String menuId, String menuName) {
-    this(0, page, accessor, wantedRows, menuId, menuName);
+                                  CfiMenuNavigator menuNavigator) {
+    this(0, page, accessor, wantedRows, menuNavigator);
   }
 
   @Override

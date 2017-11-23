@@ -20,8 +20,8 @@ public class QuarterlyMetricsTaskLatest extends QuarterlyMetricsTask {
    * @param wantedRows provide a set of rows you want to fetch
    */
   public QuarterlyMetricsTaskLatest(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
-                                    String menuId, String menuName) {
-    super(page, accessor, wantedRows, menuId, menuName);
+                                    CfiMenuNavigator menuNavigator) {
+    super(page, accessor, wantedRows, menuNavigator);
   }
 
   @Override

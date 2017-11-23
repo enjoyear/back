@@ -24,7 +24,7 @@ public interface CfiScrapingTask {
 
   StockWebPage getPage();
 
-  String getMenuName();
+  CfiMenuNavigator getNavigator();
 
   WebAccessor getWebAccessor();
 

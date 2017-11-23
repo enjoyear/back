@@ -7,7 +7,7 @@ import org.jsoup.nodes.Element;
 import java.io.IOException;
 import java.rmi.UnexpectedException;
 
-class CfiMenuClickTask {
+public class CfiMenuClickTask implements CfiMenuNavigator {
 
   private final String _nodeId;
   private final String _name;
@@ -28,7 +28,7 @@ class CfiMenuClickTask {
    *
    * @return the URL after clicking
    */
-  public String getPage(StockWebPage page) throws IOException {
+  public String navigate(StockWebPage page) throws IOException {
     String rootUrl = page.getUrl();
     Element nodeElement = _webAccessor.connect(rootUrl).getElementById(_nodeId);
     Element clickLine = nodeElement.getElementsByTag("nobr").first();
@@ -38,5 +38,15 @@ class CfiMenuClickTask {
           _name, _nodeId, rootUrl, clickLine.text()));
     }
     return WebAccessor.getHyperlink(clickLine);
+  }
+
+  @Override
+  public String getNodeId() {
+    return _nodeId;
+  }
+
+  @Override
+  public String getName() {
+    return _name;
   }
 }

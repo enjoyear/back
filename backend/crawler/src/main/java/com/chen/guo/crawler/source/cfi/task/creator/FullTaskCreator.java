@@ -25,9 +25,9 @@ public class FullTaskCreator implements TaskCreator {
 //    rowNames.add("一、营业总收入");
 //    rowNames.add("归属于母公司所有者的净利润");
 //    rowNames.add("稀释每股收益");
-    rowNames.add("归属母公司净利润（元）");
+    rowNames.add("一、营业总收入");
 
-    return _quarterlyTaskFactory.incomeStatementHist2(2013, page, rowNames);
+    return _quarterlyTaskFactory.incomeStatementHist2(2014, page, rowNames);
   }
 
 }

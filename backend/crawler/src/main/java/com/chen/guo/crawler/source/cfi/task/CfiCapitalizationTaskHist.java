@@ -37,7 +37,7 @@ public class CfiCapitalizationTaskHist extends ScrapingTask<String, Pair<String,
 
   @Override
   public TreeMap<String, Pair<String, String>> scrape() throws IOException {
-    String url = _menuTask.getPage(_page);
+    String url = _menuTask.navigate(_page);
     Document doc = _webAccessor.connect(url);
     Element content = doc.getElementById("content");
     TreeMap<String, Pair<String, String>> capitalMap = new TreeMap<>(Comparator.reverseOrder());

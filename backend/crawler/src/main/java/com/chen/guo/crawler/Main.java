@@ -34,5 +34,15 @@ public class Main {
         taskCreator, collector);
     //scraper.doAllScraping(task);
     collector.print();
+
+
+    /*
+     WebClient webClient = new WebClient();
+    HtmlPage page = webClient.navigate("http://quote.cfi.cn/lrfpb_x/11576/300182.html");
+
+    HtmlSelect sel = (HtmlSelect) page.getElementById("sel");
+
+    System.out.println("11");
+     */
   }
 }
