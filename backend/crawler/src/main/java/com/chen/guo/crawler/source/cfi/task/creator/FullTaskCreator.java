@@ -9,10 +9,17 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class FullTaskCreator implements TaskCreator {
+  private QuarterlyMetricsTaskFactory _quarterlyTaskFactory;
 
+  public FullTaskCreator(WebAccessor webAccessor) {
+    updateWebAccessor(webAccessor);
+  }
 
+  public void updateWebAccessor(WebAccessor webAccessor) {
+    _quarterlyTaskFactory = new QuarterlyMetricsTaskFactory(webAccessor);
+  }
 
-  public QuarterlyMetricsTask createTask(StockWebPage page, WebAccessor accessor) {
+  public QuarterlyMetricsTask createTask(StockWebPage page) {
 
     Set<String> rowNames = new HashSet<>();
 //    rowNames.add("一、营业总收入");
@@ -21,8 +28,7 @@ public class FullTaskCreator implements TaskCreator {
     rowNames.add("归属母公司净利润（元）");
     rowNames.add("总资产周转率（次）");
 
-    return new QuarterlyMetricsTaskFactory(accessor).financialAnalysisIndicatorsTask(page, rowNames);
+    return _quarterlyTaskFactory.financialAnalysisIndicatorsTask(page, rowNames);
   }
-
 
 }

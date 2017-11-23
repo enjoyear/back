@@ -102,7 +102,7 @@ public class CfiScraper implements Scraper {
       throws InterruptedException {
     Queue<QuarterlyMetricsTask> jobs = new ArrayDeque<>(pages.size());
     for (StockWebPage page : pages) {
-      jobs.add(taskCreator.createTask(page, WEB_ACCESSOR));
+      jobs.add(taskCreator.createTask(page));
     }
 
     List<String> failed = Collections.synchronizedList(new ArrayList<String>());
@@ -110,7 +110,8 @@ public class CfiScraper implements Scraper {
     int r = 0; //indicates current round.
 
     while (r <= MAX_RETRY_ROUNDS) {
-      final WebAccessor accessor = r == 0 ? WEB_ACCESSOR : new WebAccessor(10 * r);
+      final WebAccessor accessor = r == 0 ? WEB_ACCESSOR : new WebAccessor(5 * (r + 1));
+      taskCreator.updateWebAccessor(accessor);
 
       ConcurrentLinkedQueue<QuarterlyMetricsTask> retries = new ConcurrentLinkedQueue<>();
       ExecutorService es = Executors.newFixedThreadPool(MAX_THREAD_COUNT);
@@ -125,7 +126,7 @@ public class CfiScraper implements Scraper {
               collector.collect(job.getPage(), result);
               LOGGER.info("Finished " + job);
             } catch (IOException e) {
-              retries.add(taskCreator.createTask(job.getPage(), accessor));
+              retries.add(taskCreator.createTask(job.getPage()));
             } catch (Exception e) {
               failed.add(String.format("%s failed:\n%s", job.getPage(), ExceptionUtil.getExceptionStackTrace(e)));
             }

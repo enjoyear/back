@@ -5,5 +5,7 @@ import com.chen.guo.crawler.source.cfi.task.QuarterlyMetricsTask;
 import com.chen.guo.crawler.util.WebAccessor;
 
 public interface TaskCreator {
-  QuarterlyMetricsTask createTask(StockWebPage page, WebAccessor accessor);
+  QuarterlyMetricsTask createTask(StockWebPage page);
+
+  void updateWebAccessor(WebAccessor webAccessor);
 }

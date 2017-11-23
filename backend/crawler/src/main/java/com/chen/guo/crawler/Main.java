@@ -5,6 +5,7 @@ import com.chen.guo.crawler.source.Scraper;
 import com.chen.guo.crawler.source.cfi.CfiScraper;
 import com.chen.guo.crawler.source.cfi.task.collector.ResultCollector;
 import com.chen.guo.crawler.source.cfi.task.creator.FullTaskCreator;
+import com.chen.guo.crawler.util.WebAccessor;
 
 import java.util.Arrays;
 
@@ -27,7 +28,7 @@ public class Main {
     // ======== Refactoring END ========
 
     Scraper scraper = new CfiScraper();
-    FullTaskCreator taskCreator = new FullTaskCreator();
+    FullTaskCreator taskCreator = new FullTaskCreator(WebAccessor.getDefault());
     ResultCollector collector = new ResultCollector();
     scraper.doScraping(Arrays.asList(new StockWebPage("捷成股份", "300182", "http://quote.cfi.cn/300182.html")),
         taskCreator, collector);
