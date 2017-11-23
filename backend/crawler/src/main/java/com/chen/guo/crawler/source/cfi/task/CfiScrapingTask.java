@@ -12,17 +12,7 @@ import java.util.TreeMap;
 public interface CfiScrapingTask {
   String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
 
-  /**
-   * Navigate to the menu
-   *
-   * @return the URL after navigation
-   * @throws IOException
-   */
-  String navigate() throws IOException;
-
   StockWebPage getPage();
-
-  CfiMenuNavigator getNavigator();
 
   WebAccessor getWebAccessor();
 

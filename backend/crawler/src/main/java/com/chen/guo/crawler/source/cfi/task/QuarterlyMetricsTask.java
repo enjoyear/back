@@ -33,7 +33,12 @@ public abstract class QuarterlyMetricsTask implements CfiScrapingTask {
     return scrape(url);
   }
 
-  @Override
+  /**
+   * Navigate to the menu
+   *
+   * @return the URL after navigation
+   * @throws IOException
+   */
   public String navigate() throws IOException {
     return _navigator.navigate(_page);
   }
@@ -77,7 +82,6 @@ public abstract class QuarterlyMetricsTask implements CfiScrapingTask {
     return _page;
   }
 
-  @Override
   public CfiMenuNavigator getNavigator() {
     return _navigator;
   }
