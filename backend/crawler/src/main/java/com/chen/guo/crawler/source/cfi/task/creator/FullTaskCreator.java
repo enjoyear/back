@@ -1,22 +1,25 @@
 package com.chen.guo.crawler.source.cfi.task.creator;
 
 import com.chen.guo.crawler.model.StockWebPage;
-import com.chen.guo.crawler.source.cfi.task.QuarterlyMetricsTask;
-import com.chen.guo.crawler.source.cfi.task.factory.QuarterlyMetricsTaskFactory;
+import com.chen.guo.crawler.source.cfi.task.*;
 import com.chen.guo.crawler.util.WebAccessor;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class FullTaskCreator implements TaskCreator {
-  private QuarterlyMetricsTaskFactory _quarterlyTaskFactory;
+  private WebAccessor _webAccessor;
+  private CfiMenuNavigator _incomeStatementNavigator;
+  private CfiMenuClickTask _financialAnalysisIndicatorsNavigator;
 
   public FullTaskCreator(WebAccessor webAccessor) {
     updateWebAccessor(webAccessor);
   }
 
   public void updateWebAccessor(WebAccessor webAccessor) {
-    _quarterlyTaskFactory = new QuarterlyMetricsTaskFactory(webAccessor);
+    _webAccessor = webAccessor;
+    _incomeStatementNavigator = new CfiMenuClickTask("nodea11", "利润分配表", webAccessor);
+    _financialAnalysisIndicatorsNavigator = new CfiMenuClickTask("nodea1", "财务分析指标", webAccessor);
   }
 
   public QuarterlyMetricsTask createTask(StockWebPage page) {
@@ -27,7 +30,6 @@ public class FullTaskCreator implements TaskCreator {
 //    rowNames.add("稀释每股收益");
     rowNames.add("一、营业总收入");
 
-    return _quarterlyTaskFactory.incomeStatementHist2(2014, page, rowNames);
+    return new QuarterlyMetricsTaskHistType2(2014, page, _webAccessor, rowNames, _incomeStatementNavigator);
   }
-
 }

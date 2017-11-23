@@ -14,7 +14,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class QuarterlyMetricsTaskHist extends QuarterlyMetricsTask {
+/**
+ * Type 1 Hist task gets details' link from Content Table rows
+ */
+public class QuarterlyMetricsTaskHistType1 extends QuarterlyMetricsTask {
 
   private final int _startYear;
 
@@ -23,14 +26,14 @@ public class QuarterlyMetricsTaskHist extends QuarterlyMetricsTask {
    * @param page       the StockWebPage
    * @param wantedRows provide a set of rows you want to fetch
    */
-  public QuarterlyMetricsTaskHist(int startYear, StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
-                                  CfiMenuNavigator menuNavigator) {
+  public QuarterlyMetricsTaskHistType1(int startYear, StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
+                                       CfiMenuNavigator menuNavigator) {
     super(page, accessor, wantedRows, menuNavigator);
     _startYear = startYear;
   }
 
-  public QuarterlyMetricsTaskHist(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
-                                  CfiMenuNavigator menuNavigator) {
+  public QuarterlyMetricsTaskHistType1(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
+                                       CfiMenuNavigator menuNavigator) {
     this(0, page, accessor, wantedRows, menuNavigator);
   }
 

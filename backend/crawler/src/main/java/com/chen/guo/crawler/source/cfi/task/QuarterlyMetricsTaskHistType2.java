@@ -13,47 +13,35 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class QuarterlyMetricsTaskHist2 implements CfiScrapingTask {
+/**
+ * Type 2 Hist task gets details' link from "Sel" drop down
+ */
+public class QuarterlyMetricsTaskHistType2 extends QuarterlyMetricsTask {
   private final static Pattern MATCHER = Pattern.compile("window.location='(.*?)'");
 
   private final int _startYear;
-  private final StockWebPage _page;
-  private final WebAccessor _accessor;
-  private final Set<String> _wantedRows;
-  private final String _menuId;
-  private final String _menuName;
 
   /**
    * @param startYear  denotes the oldest year we care about. This startYear is inclusive
    * @param page       the StockWebPage
    * @param wantedRows provide a set of rows you want to fetch
    */
-  public QuarterlyMetricsTaskHist2(int startYear, StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
-                                   String menuId, String menuName) {
+  public QuarterlyMetricsTaskHistType2(int startYear, StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
+                                       CfiMenuNavigator menuNavigator) {
+    super(page, accessor, wantedRows, menuNavigator);
     _startYear = startYear;
-    _page = page;
-    _accessor = accessor;
-    _wantedRows = wantedRows;
-
-    _menuId = menuId;
-    _menuName = menuName;
-
   }
 
-  public QuarterlyMetricsTaskHist2(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
-                                   String menuId, String menuName) {
-    this(0, page, accessor, wantedRows, menuId, menuName);
+  public QuarterlyMetricsTaskHistType2(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
+                                       CfiMenuNavigator menuNavigator) {
+    this(0, page, accessor, wantedRows, menuNavigator);
   }
 
   @Override
-  public String navigate() throws IOException {
-    return null;
-  }
-
   public TreeMap<Integer, Map<String, Double>> scrape(String menuPage) throws IOException {
     Document pageDoc = getWebAccessor().connect(menuPage);
     Element table = pageDoc.getElementById("content");
-    //validateHeader(menuPage, table);
+    validateHeader(menuPage, table);
 
     String yearlyUrl = getYearlyUrlFormat(pageDoc);
     Elements selections = pageDoc.getElementById("sel").children();
@@ -61,17 +49,23 @@ public class QuarterlyMetricsTaskHist2 implements CfiScrapingTask {
     if (!items.get(0).equals("最新")) {
       throw new RuntimeException(String.format("The style of the 年份 selection has changed for %s", _page));
     }
-    List<String> wantedLinks = new ArrayList<>();
+
+    List<QuarterlyMetricsTaskLatest> subTasks = new ArrayList<>();
     for (int i = 1; i < items.size(); ++i) {
       Integer year = Integer.valueOf(items.get(i));
-      if (year > _startYear) {
-        wantedLinks.add(String.format("%s%s", yearlyUrl, year.toString()));
+      if (year >= _startYear) {
+        CfiMenuNoopTask menuTask = new CfiMenuNoopTask(_navigator.getNodeId(), _navigator.getName(),
+            String.format("%s%s", yearlyUrl, year.toString()));
+        QuarterlyMetricsTaskLatest subTask = new QuarterlyMetricsTaskLatest(_page, _accessor, _wantedRows, menuTask);
+        subTasks.add(subTask);
       }
     }
 
-
-    //HashMap<String, Elements> selectedRows = getSelectedRows(table);
     TreeMap<Integer, Map<String, Double>> results = new TreeMap<>();
+    for (QuarterlyMetricsTaskLatest subTask : subTasks) {
+      TreeMap<Integer, Map<String, Double>> yearlyScrape = subTask.scrape();
+      results.putAll(yearlyScrape);
+    }
     return results;
   }
 
@@ -88,20 +82,5 @@ public class QuarterlyMetricsTaskHist2 implements CfiScrapingTask {
       throw new RuntimeException("Cannot find 'window.location' from the javascript" + scriptContent);
     }
     return matcher.group(1);
-  }
-
-  @Override
-  public StockWebPage getPage() {
-    return _page;
-  }
-
-  @Override
-  public CfiMenuNavigator getNavigator() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public WebAccessor getWebAccessor() {
-    return _accessor;
   }
 }
