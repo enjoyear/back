@@ -3,7 +3,7 @@ package com.chen.guo.crawler.source.cfi;
 import com.chen.guo.common.exception.ExceptionUtil;
 import com.chen.guo.crawler.model.StockWebPage;
 import com.chen.guo.crawler.source.Scraper;
-import com.chen.guo.crawler.source.cfi.task.QuarterlyBasedTask;
+import com.chen.guo.crawler.source.cfi.task.QuarterlyMetricsTask;
 import com.chen.guo.crawler.source.cfi.task.collector.ResultCollector;
 import com.chen.guo.crawler.source.cfi.task.creator.TaskCreator;
 import com.chen.guo.crawler.util.WebAccessor;
@@ -100,7 +100,7 @@ public class CfiScraper implements Scraper {
   @Override
   public void doScraping(List<StockWebPage> pages, TaskCreator taskCreator, ResultCollector collector)
       throws InterruptedException {
-    Queue<QuarterlyBasedTask> jobs = new ArrayDeque<>(pages.size());
+    Queue<QuarterlyMetricsTask> jobs = new ArrayDeque<>(pages.size());
     for (StockWebPage page : pages) {
       jobs.add(taskCreator.createTask(page, WEB_ACCESSOR));
     }
@@ -112,11 +112,11 @@ public class CfiScraper implements Scraper {
     while (r <= MAX_RETRY_ROUNDS) {
       final WebAccessor accessor = r == 0 ? WEB_ACCESSOR : new WebAccessor(10 * r);
 
-      ConcurrentLinkedQueue<QuarterlyBasedTask> retries = new ConcurrentLinkedQueue<>();
+      ConcurrentLinkedQueue<QuarterlyMetricsTask> retries = new ConcurrentLinkedQueue<>();
       ExecutorService es = Executors.newFixedThreadPool(MAX_THREAD_COUNT);
 
       while (!jobs.isEmpty()) {
-        final QuarterlyBasedTask job = jobs.poll();
+        final QuarterlyMetricsTask job = jobs.poll();
         es.submit(new Runnable() {
           @Override
           public void run() {
@@ -163,7 +163,7 @@ public class CfiScraper implements Scraper {
     }
   }
 
-  private String printFailedPagesList(Collection<QuarterlyBasedTask> failed) {
+  private String printFailedPagesList(Collection<QuarterlyMetricsTask> failed) {
     return String.format("Failed to download %d pages:\n%s", failed.size(),
         String.join(",", failed.stream().map(x -> x.getPage().toString()).collect(Collectors.toList())));
   }

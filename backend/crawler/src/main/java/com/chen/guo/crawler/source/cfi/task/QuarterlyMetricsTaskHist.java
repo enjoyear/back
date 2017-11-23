@@ -14,23 +14,24 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class IncomeStatementTaskHist extends IncomeStatementTask {
+public class QuarterlyMetricsTaskHist extends QuarterlyMetricsTask {
 
   private final int _startYear;
 
   /**
-   * @param startYear denotes the oldest year we care about. This startYear is inclusive
-   * @param page      the StockWebPage
-   * @param accessor
-   * @param rowNames  provide a set of rows you want to fetch
+   * @param startYear  denotes the oldest year we care about. This startYear is inclusive
+   * @param page       the StockWebPage
+   * @param wantedRows provide a set of rows you want to fetch
    */
-  public IncomeStatementTaskHist(int startYear, StockWebPage page, WebAccessor accessor, Set<String> rowNames) {
-    super(page, accessor, rowNames);
+  public QuarterlyMetricsTaskHist(int startYear, StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
+                                  String menuId, String menuName) {
+    super(page, accessor, wantedRows, menuId, menuName);
     _startYear = startYear;
   }
 
-  public IncomeStatementTaskHist(StockWebPage page, WebAccessor accessor, Set<String> rowNames) {
-    this(0, page, accessor, rowNames);
+  public QuarterlyMetricsTaskHist(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
+                                  String menuId, String menuName) {
+    this(0, page, accessor, wantedRows, menuId, menuName);
   }
 
   @Override

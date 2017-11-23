@@ -13,15 +13,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class IncomeStatementTaskLatest extends IncomeStatementTask {
+public class QuarterlyMetricsTaskLatest extends QuarterlyMetricsTask {
 
   /**
-   * @param page     the StockWebPage
-   * @param accessor
-   * @param rowNames provide a set of rows you want to fetch
+   * @param page       the StockWebPage
+   * @param wantedRows provide a set of rows you want to fetch
    */
-  public IncomeStatementTaskLatest(StockWebPage page, WebAccessor accessor, Set<String> rowNames) {
-    super(page, accessor, rowNames);
+  public QuarterlyMetricsTaskLatest(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
+                                    String menuId, String menuName) {
+    super(page, accessor, wantedRows, menuId, menuName);
   }
 
   @Override

@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class QuarterlyBasedTask implements CfiScrapingTask {
+public abstract class QuarterlyMetricsTask implements CfiScrapingTask {
   protected final StockWebPage _page;
   protected final WebAccessor _accessor;
   protected final Set<String> _wantedRows;
@@ -26,8 +26,8 @@ public abstract class QuarterlyBasedTask implements CfiScrapingTask {
    * @param accessor
    * @param wantedRows provide a set of the metrics you are interested in
    */
-  protected QuarterlyBasedTask(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
-                               String menuId, String menuName) {
+  protected QuarterlyMetricsTask(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
+                                 String menuId, String menuName) {
     _page = page;
     _accessor = accessor;
     _wantedRows = Collections.unmodifiableSet(wantedRows);
