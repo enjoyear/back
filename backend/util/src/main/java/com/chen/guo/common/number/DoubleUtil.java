@@ -1,5 +1,8 @@
 package com.chen.guo.common.number;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+
 public class DoubleUtil {
   /**
    * Convert string to double
@@ -30,5 +33,11 @@ public class DoubleUtil {
       }
       return Double.valueOf(split[0]);
     }
+  }
+
+  public static double roundToNSignificantNumbers(double d, int n) {
+    BigDecimal bd = new BigDecimal(d);
+    bd = bd.round(new MathContext(n));
+    return bd.doubleValue();
   }
 }
