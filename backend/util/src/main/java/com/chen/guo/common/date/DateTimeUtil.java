@@ -13,11 +13,14 @@ public class DateTimeUtil {
   }
 
   /**
-   * Convert a date string to an integer yyyyMM
+   * Convert a date string to an integer yyyyMMdd
    */
-  public static int getYearMonthInt(String dateString, String pattern) {
+  public static int getDateInt(String dateString, String pattern) {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-    LocalDate date = LocalDate.parse(dateString, formatter);
-    return date.getYear() * 100 + date.getMonthValue();
+    return getDateInt(LocalDate.parse(dateString, formatter));
+  }
+
+  public static int getDateInt(LocalDate date) {
+    return date.getYear() * 10000 + date.getMonthValue() * 100 + date.getDayOfMonth();
   }
 }

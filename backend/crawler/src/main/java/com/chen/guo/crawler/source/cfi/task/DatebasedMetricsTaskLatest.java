@@ -13,13 +13,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class QuarterlyMetricsTaskLatest extends QuarterlyMetricsTask {
+public class DatebasedMetricsTaskLatest extends DatebasedMetricsTask {
 
   /**
    * @param page       the StockWebPage
    * @param wantedRows provide a set of rows you want to fetch
    */
-  public QuarterlyMetricsTaskLatest(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
+  public DatebasedMetricsTaskLatest(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
                                     CfiMenuNavigator menuNavigator) {
     super(page, accessor, wantedRows, menuNavigator);
   }
@@ -33,7 +33,7 @@ public class QuarterlyMetricsTaskLatest extends QuarterlyMetricsTask {
     //Add all wanted rows' values to a map
     TreeMap<Integer, Map<String, Double>> results = new TreeMap<>();
     for (int col = 1; col < headerRow.size(); ++col) {
-      int yearMonthInt = DateTimeUtil.getYearMonthInt(headerRow.get(col).text(), DEFAULT_DATE_PATTERN);
+      int yearMonthInt = DateTimeUtil.getDateInt(headerRow.get(col).text(), DEFAULT_DATE_PATTERN);
       Map<String, Double> quarterlyNumbers = new HashMap<>();
       for (Map.Entry<String, Elements> row : selectedRows.entrySet()) {
         String rowName = row.getKey();

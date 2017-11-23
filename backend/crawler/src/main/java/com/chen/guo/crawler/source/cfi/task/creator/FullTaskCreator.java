@@ -11,8 +11,9 @@ import java.util.Set;
 
 public class FullTaskCreator implements TaskCreator {
   private WebAccessor _webAccessor;
-  private CfiMenuNavigator _incomeStatementNavigator;
   private CfiMenuClickTask _financialAnalysisIndicatorsNavigator;
+  private CfiMenuNavigator _incomeStatementNavigator;
+  private CfiMenuClickTask _capitalStructureNavigator;
 
   public FullTaskCreator(WebAccessor webAccessor) {
     updateWebAccessor(webAccessor);
@@ -20,23 +21,31 @@ public class FullTaskCreator implements TaskCreator {
 
   public void updateWebAccessor(WebAccessor webAccessor) {
     _webAccessor = webAccessor;
-    _incomeStatementNavigator = new CfiMenuClickTask("nodea11", "利润分配表", webAccessor);
     _financialAnalysisIndicatorsNavigator = new CfiMenuClickTask("nodea1", "财务分析指标", webAccessor);
+    _incomeStatementNavigator = new CfiMenuClickTask("nodea11", "利润分配表", webAccessor);
+    _capitalStructureNavigator = new CfiMenuClickTask("nodea21", "股本结构", webAccessor);
   }
 
   public CfiScrapingTask createTask(StockWebPage page) {
+    int startYear = 2014;
 
     Set<String> incomeStatementRows = new HashSet<>();
     incomeStatementRows.add("一、营业总收入");
-    QuarterlyMetricsTaskHistType2 incomeStatementTask = new QuarterlyMetricsTaskHistType2(2014, page, _webAccessor, incomeStatementRows, _incomeStatementNavigator);
+    DatebasedMetricsTaskHistType2 incomeStatementTask = new DatebasedMetricsTaskHistType2(startYear, page, _webAccessor, incomeStatementRows, _incomeStatementNavigator);
 
     Set<String> faiRows = new HashSet<>();
     faiRows.add("归属母公司净利润（元）");
-    QuarterlyMetricsTaskHistType1 faiTask = new QuarterlyMetricsTaskHistType1(2014, page, _webAccessor, faiRows, _financialAnalysisIndicatorsNavigator);
+    DatebasedMetricsTaskHistType1 faiTask = new DatebasedMetricsTaskHistType1(startYear, page, _webAccessor, faiRows, _financialAnalysisIndicatorsNavigator);
+
+    Set<String> capitalStructureRows = new HashSet<>();
+    capitalStructureRows.add("1.A股(股)");
+    DatebasedMetricsTaskHistType2 capitalStructureTask = new DatebasedMetricsTaskHistType2(startYear, page, _webAccessor, capitalStructureRows, _capitalStructureNavigator);
+
 
     List<CfiScrapingTask> tasks = new ArrayList<>();
     tasks.add(incomeStatementTask);
     tasks.add(faiTask);
+    tasks.add(capitalStructureTask);
 
     return new CompositeCfiScrapingTask(page, tasks);
   }

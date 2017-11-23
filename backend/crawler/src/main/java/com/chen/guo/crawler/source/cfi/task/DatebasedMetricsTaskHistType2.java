@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * Type 2 Hist task gets details' link from "Sel" drop down
  */
-public class QuarterlyMetricsTaskHistType2 extends QuarterlyMetricsTask {
+public class DatebasedMetricsTaskHistType2 extends DatebasedMetricsTask {
   private final static Pattern MATCHER = Pattern.compile("window.location='(.*?)'");
 
   private final int _startYear;
@@ -26,13 +26,13 @@ public class QuarterlyMetricsTaskHistType2 extends QuarterlyMetricsTask {
    * @param page       the StockWebPage
    * @param wantedRows provide a set of rows you want to fetch
    */
-  public QuarterlyMetricsTaskHistType2(int startYear, StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
+  public DatebasedMetricsTaskHistType2(int startYear, StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
                                        CfiMenuNavigator menuNavigator) {
     super(page, accessor, wantedRows, menuNavigator);
     _startYear = startYear;
   }
 
-  public QuarterlyMetricsTaskHistType2(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
+  public DatebasedMetricsTaskHistType2(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
                                        CfiMenuNavigator menuNavigator) {
     this(0, page, accessor, wantedRows, menuNavigator);
   }
@@ -50,19 +50,19 @@ public class QuarterlyMetricsTaskHistType2 extends QuarterlyMetricsTask {
       throw new RuntimeException(String.format("The style of the 年份 selection has changed for %s", _page));
     }
 
-    List<QuarterlyMetricsTaskLatest> subTasks = new ArrayList<>();
+    List<DatebasedMetricsTaskLatest> subTasks = new ArrayList<>();
     for (int i = 1; i < items.size(); ++i) {
       Integer year = Integer.valueOf(items.get(i));
       if (year >= _startYear) {
         CfiMenuNoopTask menuTask = new CfiMenuNoopTask(_navigator.getNodeId(), _navigator.getName(),
             String.format("%s%s", yearlyUrl, year.toString()));
-        QuarterlyMetricsTaskLatest subTask = new QuarterlyMetricsTaskLatest(_page, _accessor, _wantedRows, menuTask);
+        DatebasedMetricsTaskLatest subTask = new DatebasedMetricsTaskLatest(_page, _accessor, _wantedRows, menuTask);
         subTasks.add(subTask);
       }
     }
 
     TreeMap<Integer, Map<String, Double>> results = new TreeMap<>();
-    for (QuarterlyMetricsTaskLatest subTask : subTasks) {
+    for (DatebasedMetricsTaskLatest subTask : subTasks) {
       TreeMap<Integer, Map<String, Double>> yearlyScrape = subTask.scrape();
       results.putAll(yearlyScrape);
     }

@@ -8,7 +8,7 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.*;
 
-public abstract class QuarterlyMetricsTask implements CfiScrapingTask {
+public abstract class DatebasedMetricsTask implements CfiScrapingTask {
   final StockWebPage _page;
   final WebAccessor _accessor;
   final Set<String> _wantedRows;
@@ -17,7 +17,7 @@ public abstract class QuarterlyMetricsTask implements CfiScrapingTask {
   /**
    * @param wantedRows provide a set of the metrics you are interested in
    */
-  QuarterlyMetricsTask(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
+  DatebasedMetricsTask(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
                        CfiMenuNavigator navigator) {
     _page = page;
     _accessor = accessor;

@@ -17,7 +17,7 @@ import java.util.TreeMap;
 /**
  * Type 1 Hist task gets details' link from Content Table rows
  */
-public class QuarterlyMetricsTaskHistType1 extends QuarterlyMetricsTask {
+public class DatebasedMetricsTaskHistType1 extends DatebasedMetricsTask {
 
   private final int _startYear;
 
@@ -26,13 +26,13 @@ public class QuarterlyMetricsTaskHistType1 extends QuarterlyMetricsTask {
    * @param page       the StockWebPage
    * @param wantedRows provide a set of rows you want to fetch
    */
-  public QuarterlyMetricsTaskHistType1(int startYear, StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
+  public DatebasedMetricsTaskHistType1(int startYear, StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
                                        CfiMenuNavigator menuNavigator) {
     super(page, accessor, wantedRows, menuNavigator);
     _startYear = startYear;
   }
 
-  public QuarterlyMetricsTaskHistType1(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
+  public DatebasedMetricsTaskHistType1(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
                                        CfiMenuNavigator menuNavigator) {
     this(0, page, accessor, wantedRows, menuNavigator);
   }
@@ -70,9 +70,7 @@ public class QuarterlyMetricsTaskHistType1 extends QuarterlyMetricsTask {
         if (date.getYear() < _startYear) {
           break;
         }
-
-        int yearMonthKey = date.getYear() * 100 + date.getMonthValue();
-        Map<String, Double> data = results.computeIfAbsent(yearMonthKey, x -> new HashMap<>());
+        Map<String, Double> data = results.computeIfAbsent(DateTimeUtil.getDateInt(date), x -> new HashMap<>());
         data.put(name, DoubleUtil.parse(detailColumns.get(1).text()));
       }
     }

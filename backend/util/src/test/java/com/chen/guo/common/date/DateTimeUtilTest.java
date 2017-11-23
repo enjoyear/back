@@ -18,6 +18,6 @@ public class DateTimeUtilTest {
 
   @Test
   public void testGetYearMonthInt() {
-    assertEquals(DateTimeUtil.getYearMonthInt("2017-01-31", "yyyy-MM-dd"), 201701);
+    assertEquals(DateTimeUtil.getDateInt("2017-01-31", "yyyy-MM-dd"), 201701);
   }
 }
