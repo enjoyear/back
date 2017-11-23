@@ -20,18 +20,13 @@ public interface CfiScrapingTask {
    */
   String navigate() throws IOException;
 
-  TreeMap<Integer, Map<String, Double>> scrape(String menuPage) throws IOException;
-
   StockWebPage getPage();
 
   CfiMenuNavigator getNavigator();
 
   WebAccessor getWebAccessor();
 
-  default TreeMap<Integer, Map<String, Double>> scrape() throws IOException {
-    String url = navigate();
-    return scrape(url);
-  }
+  TreeMap<Integer, Map<String, Double>> scrape() throws IOException;
 
   /**
    * Get the page element for the table body of the main content

@@ -6,28 +6,31 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public abstract class QuarterlyMetricsTask implements CfiScrapingTask {
-  protected final StockWebPage _page;
-  protected final WebAccessor _accessor;
-  protected final Set<String> _wantedRows;
-  protected CfiMenuNavigator _navigator;
+  final StockWebPage _page;
+  final WebAccessor _accessor;
+  final Set<String> _wantedRows;
+  CfiMenuNavigator _navigator;
 
   /**
-   * @param page
-   * @param accessor
    * @param wantedRows provide a set of the metrics you are interested in
    */
-  protected QuarterlyMetricsTask(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
-                                 CfiMenuNavigator navigator) {
+  QuarterlyMetricsTask(StockWebPage page, WebAccessor accessor, Set<String> wantedRows,
+                       CfiMenuNavigator navigator) {
     _page = page;
     _accessor = accessor;
     _wantedRows = Collections.unmodifiableSet(wantedRows);
     _navigator = navigator;
+  }
+
+  abstract TreeMap<Integer, Map<String, Double>> scrape(String menuPage) throws IOException;
+
+  @Override
+  public TreeMap<Integer, Map<String, Double>> scrape() throws IOException {
+    String url = navigate();
+    return scrape(url);
   }
 
   @Override
@@ -40,7 +43,7 @@ public abstract class QuarterlyMetricsTask implements CfiScrapingTask {
    *
    * @return a hashmap: RowName => Row Columns
    */
-  protected HashMap<String, Elements> getSelectedRows(Element table) {
+  HashMap<String, Elements> getSelectedRows(Element table) {
     Set<String> rowsWanted = new HashSet<>(_wantedRows);
     HashMap<String, Elements> selectedRows = new HashMap<>();
     for (Element row : table.children()) {
@@ -59,7 +62,7 @@ public abstract class QuarterlyMetricsTask implements CfiScrapingTask {
   /**
    * Validate the header to make sure that the table format doesn't change
    */
-  protected Elements validateHeader(String menuPage, Element table) {
+  Elements validateHeader(String menuPage, Element table) {
     Element yearMonthTr = table.getElementsByTag("tr").get(1);
     Elements headerRow = yearMonthTr.children();
     if (!headerRow.first().ownText().equals("截止日期")) {

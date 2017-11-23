@@ -22,7 +22,7 @@ public class FullTaskCreator implements TaskCreator {
     _financialAnalysisIndicatorsNavigator = new CfiMenuClickTask("nodea1", "财务分析指标", webAccessor);
   }
 
-  public QuarterlyMetricsTask createTask(StockWebPage page) {
+  public CfiScrapingTask createTask(StockWebPage page) {
 
     Set<String> rowNames = new HashSet<>();
 //    rowNames.add("一、营业总收入");
