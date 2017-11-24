@@ -30,7 +30,11 @@ public class Main {
     Scraper scraper = new CfiScraper();
     FullTaskCreator taskCreator = new FullTaskCreator(WebAccessor.getDefault());
     ResultCollector collector = new ResultCollector();
-    scraper.doScraping(Arrays.asList(new StockWebPage("捷成股份", "300182", "http://quote.cfi.cn/300182.html")),
+    scraper.doScraping(
+        Arrays.asList(
+            new StockWebPage("捷成股份", "300182", "http://quote.cfi.cn/300182.html"),
+            new StockWebPage("巨星科技", "002444", "http://quote.cfi.cn/002444.html")
+        ),
         taskCreator, collector);
     //scraper.doAllScraping(task);
     collector.print();

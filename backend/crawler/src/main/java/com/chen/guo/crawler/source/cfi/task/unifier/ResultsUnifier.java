@@ -18,7 +18,7 @@ public class ResultsUnifier {
   private static final MetricUnifier NET_REVENUE_UNIFIER = new MetricUnifier(
       "一、营业总收入", IncomeStatementConstants.NET_REVENUE,
       val -> {
-        val = val / 1E8; //wan yuan -> yi yuan
+        val = val / 1E4; //wan yuan -> yi yuan
         return DoubleUtil.roundToNSignificantNumbers(val, DEFAULT_NUMBER_OF_SIGNIFICANT_FIGURES);
       });
 
