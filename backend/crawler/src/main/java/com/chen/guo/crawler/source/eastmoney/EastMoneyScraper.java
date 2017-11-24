@@ -49,7 +49,7 @@ public class EastMoneyScraper implements Scraper {
   }
 
   @Override
-  public void doScraping(List<StockWebPage> pages, TaskCreator taskCreator, ResultCollector collector) throws Exception {
+  public void doScraping(List<StockWebPage> pages, TaskCreator taskCreator, ResultCollector collector) throws InterruptedException {
     throw new UnsupportedOperationException();
   }
 

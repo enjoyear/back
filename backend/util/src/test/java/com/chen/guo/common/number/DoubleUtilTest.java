@@ -7,10 +7,13 @@ import static org.testng.Assert.assertEquals;
 public class DoubleUtilTest {
   @Test
   public void testParse() {
-    assertEquals(DoubleUtil.parse("-2534.65"), -2534.65);
+    assertEquals(DoubleUtil.parse("0.39元"), 0.39);
     assertEquals(DoubleUtil.parse("0.39(元)"), 0.39);
+    assertEquals(DoubleUtil.parse("1000.1亿"), 1.0001E11);
+    assertEquals(DoubleUtil.parse("0.39(亿)"), 3.9E7);
     assertEquals(DoubleUtil.parse("0.25（元）"), 0.25);
-    assertEquals(DoubleUtil.parse("0.25（万元）"), 0.25);
+    assertEquals(DoubleUtil.parse("-0.25（万元）"), -2500.0);
+    assertEquals(DoubleUtil.parse("-2534.65"), -2534.65);
   }
 
   @Test

@@ -20,7 +20,7 @@ public interface Scraper {
    */
   List<StockWebPage> getProfilePages() throws IOException;
 
-  void doScraping(List<StockWebPage> pages, TaskCreator taskCreator, ResultCollector collector) throws Exception;
+  void doScraping(List<StockWebPage> pages, TaskCreator taskCreator, ResultCollector collector) throws InterruptedException;
 
   default void doAllScraping(List<StockWebPage> pages, TaskCreator taskCreator, ResultCollector collector) {
     try {
