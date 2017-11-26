@@ -1,4 +1,4 @@
-package com.chen.guo.data.write.fs;
+package com.chen.guo.data.write.fs.orc;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
  * https://www.programcreek.com/java-api-examples/index.php?api=org.apache.hadoop.hive.ql.io.orc.OrcFile
  * https://github.com/eclecticlogic/eclectic-orc
  */
-public class OrcTestReaderWriter {
+public class ExampleOrcReaderWriter {
   final static String outputPath = "/Users/chguo/Downloads/test.orc";
 
   public static void main(String[] args) throws IOException {

@@ -1,4 +1,4 @@
-package com.chen.guo.data.write.fs;
+package com.chen.guo.data.write.fs.orc;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -10,7 +10,7 @@ import org.apache.orc.TypeDescription;
 
 import java.io.IOException;
 
-public abstract class AbstractOrcWriter<T> implements OrcWriterCreator<T>, OrcWriter<T> {
+public abstract class AbstractOrcWriter<T> implements OrcWriter<T> {
   private Configuration _configuration = new Configuration();
   private OrcFile.WriterOptions _writerOptions;
   private CompressionKind _compressionKind;
@@ -78,31 +78,31 @@ public abstract class AbstractOrcWriter<T> implements OrcWriterCreator<T>, OrcWr
   }
 
   @Override
-  public OrcWriterCreator<T> withConfiguration(Configuration configuration) {
+  public OrcWriter<T> withConfiguration(Configuration configuration) {
     _configuration = configuration;
     return this;
   }
 
   @Override
-  public OrcWriterCreator<T> withOptions(OrcFile.WriterOptions writerOptions) {
+  public OrcWriter<T> withOptions(OrcFile.WriterOptions writerOptions) {
     _writerOptions = writerOptions;
     return this;
   }
 
   @Override
-  public OrcWriterCreator<T> withCompression(CompressionKind compressionKind) {
+  public OrcWriter<T> withCompression(CompressionKind compressionKind) {
     _compressionKind = compressionKind;
     return this;
   }
 
   @Override
-  public OrcWriterCreator<T> withBufferSize(int size) {
+  public OrcWriter<T> withBufferSize(int size) {
     _bufferSize = size;
     return this;
   }
 
   @Override
-  public OrcWriterCreator<T> withBatchSize(int batchSize) {
+  public OrcWriter<T> withBatchSize(int batchSize) {
     _batchSize = batchSize;
     return this;
   }
