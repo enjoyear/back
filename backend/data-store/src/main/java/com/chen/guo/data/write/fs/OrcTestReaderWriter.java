@@ -23,12 +23,12 @@ import java.nio.charset.StandardCharsets;
  * https://www.programcreek.com/java-api-examples/index.php?api=org.apache.hadoop.hive.ql.io.orc.OrcFile
  * https://github.com/eclecticlogic/eclectic-orc
  */
-public class OrcWriter {
+public class OrcTestReaderWriter {
   final static String outputPath = "/Users/chguo/Downloads/test.orc";
 
   public static void main(String[] args) throws IOException {
     write();
-    //read();
+    read();
   }
 
   public static void read() throws IOException {
@@ -49,7 +49,10 @@ public class OrcWriter {
 
       for (int r = 0; r < batch.size; ++r) {
         StringBuilder sb = new StringBuilder();
-
+        /**
+         * Alternatively, you can use stringifyValue
+         */
+        //firstCol.stringifyValue(new StringBuilder(), r);
         String col1 = new String(firstCol.vector[r], firstCol.start[r], firstCol.length[r]);
         long col2 = secondCol.vector[r];
         sb.append(String.format("%s , %d , map(", col1, col2));
@@ -86,6 +89,10 @@ public class OrcWriter {
             OrcFile.writerOptions(conf).setSchema(schema));
 
     VectorizedRowBatch batch = schema.createRowBatch();
+    /**
+     * See the doc for BytesColumnVector
+     * https://orc.apache.org/api/hive-storage-api/index.html?help-doc.html
+     */
     BytesColumnVector first = (BytesColumnVector) batch.cols[0];
     LongColumnVector second = (LongColumnVector) batch.cols[1];
 
@@ -106,7 +113,12 @@ public class OrcWriter {
     for (int r = 0; r < 150; ++r) {
       int row = batch.size++;
 
-      first.setVal(row, String.format("Row: %d", r).getBytes());
+      /**
+       * Performance is bad to setVal, which copies data into a local buffer
+       */
+      //first.setVal(row, String.format("Row: %d", r).getBytes());
+      byte[] bytes = String.format("row: %d", r).getBytes();
+      first.setRef(row, bytes, 0, bytes.length);
       second.vector[row] = r * 3;
 
       map.offsets[row] = map.childCount;
@@ -116,6 +128,9 @@ public class OrcWriter {
       for (int mapElem = (int) map.offsets[row];
            mapElem < map.offsets[row] + MAP_SIZE; ++mapElem) {
         String key = "row " + r + "." + (mapElem - map.offsets[row]);
+        /**
+         * Use setRef to improve performance
+         */
         mapKey.setVal(mapElem, key.getBytes(StandardCharsets.UTF_8));
         mapValue.vector[mapElem] = mapElem;
       }
