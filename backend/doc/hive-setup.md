@@ -35,7 +35,9 @@ java -jar orc-tools-1.4.1-uber.jar meta test.orc
 ```sql
 drop table test;
 create external table test (
-    a string -- it must be a??
+    first string,
+    second int,
+    third map<string,int>
 )
 STORED AS ORC
 TBLPROPERTIES("orc.compress"="ZLIB")
